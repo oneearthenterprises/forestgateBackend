@@ -19,8 +19,9 @@ const registerUser = async (req, res) => {
         // check if user already exists
         const alradyuser = await Usermodel.findOne({ email });
         if (alradyuser) {
-            return res.status(400).json({
-                message: "User already exists"
+            return res.status(409).json({
+                status: "false",
+                message: "You already exist"
             })
         }
 
@@ -299,5 +300,15 @@ const resendForgotOtp = async (req, res) => {
     }
 };
 
+const logoutUser = async (req, res) => {
+    try {
+        res.clearCookie("token");
+        res.status(200).json({
+            message: "User logged out successfully"
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
 
-export default { registerUser, loginUser, sendForgotOtp, verifyForgotOtp, resetPassword, resendForgotOtp }
+export default { registerUser, loginUser, sendForgotOtp, verifyForgotOtp, resetPassword, resendForgotOtp, logoutUser }
