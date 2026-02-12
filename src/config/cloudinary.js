@@ -41,6 +41,7 @@ if (process.env.CLOUDINARY_URL) {
 else if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET) {
     console.log("Using individual Cloudinary environment variables");
     cloudinary.config({
+
         cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
         api_key: process.env.CLOUDINARY_API_KEY,
         api_secret: process.env.CLOUDINARY_API_SECRET,
@@ -51,7 +52,8 @@ else {
     console.error("Please set either CLOUDINARY_URL or all three: CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET in your .env file");
 }
 
-// Test the configuration (optional)
+
+// Test the configuration 
 cloudinary.api.ping()
     .then(() => {
         console.log("✅ Cloudinary configuration is valid!");
