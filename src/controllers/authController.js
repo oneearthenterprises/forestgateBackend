@@ -2,10 +2,60 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import Usermodel from "../models/user.js";
 import nodemailer from "nodemailer";
+import dotenv from "dotenv";
+dotenv.config();
 
 
 
+// admin routes
 
+const adminLogin = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({
+                message: "Please fill all fields"
+            });
+        }
+
+        // Find user in DB
+        const admin = await Usermodel.findOne({ email });
+
+        if (!admin || admin.role !== "admin") {
+            return res.status(403).json({
+                message: "Access denied. Not an admin."
+            });
+        }
+
+        // Compare password
+        const isMatch = await bcrypt.compare(password, admin.password);
+
+        if (!isMatch) {
+            return res.status(401).json({
+                message: "Invalid credentials"
+            });
+        }
+
+        // Generate JWT
+        const token = jwt.sign(
+            { id: admin._id, role: admin.role },
+            process.env.JWT_SECRET,
+            { expiresIn: "7d" }
+        );
+
+        return res.status(200).json({
+            message: "Admin logged in successfully",
+            token
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            message: error.message
+        });
+    }
+};
 
 
 const registerUser = async (req, res) => {
@@ -311,4 +361,4 @@ const logoutUser = async (req, res) => {
     }
 };
 
-export default { registerUser, loginUser, sendForgotOtp, verifyForgotOtp, resetPassword, resendForgotOtp, logoutUser }
+export default { registerUser, loginUser, sendForgotOtp, verifyForgotOtp, resetPassword, resendForgotOtp, logoutUser,adminLogin }

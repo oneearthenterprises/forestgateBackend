@@ -5,6 +5,7 @@ import roomRoutes from "./routes/roomRoutes.js";
 import contactRoutes from "./routes/contactRoutes.js";
 import bookingRoutes from "./routes/bookingRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
 const app = express();
 
 app.use(cors());
@@ -15,5 +16,6 @@ app.use("/Rooms/api", roomRoutes)
 app.use("/Contact/api", contactRoutes)
 app.use("/Booking/api", bookingRoutes)
 app.use("/Payment/api", paymentRoutes)
+app.use("/api/admin", adminRoutes);
 
 export default app;
