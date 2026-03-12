@@ -169,7 +169,8 @@ const getAllRooms = async (req, res) => {
 // Get single room
 const getSingleRoom = async (req, res) => {
     try {
-        const room = await RoomLists.findById(req.params.id);
+        const { id } = req.params;
+        const room = await RoomLists.findById(id);
 
         if (!room) {
             return res.status(404).json({ message: "Room not found" });
