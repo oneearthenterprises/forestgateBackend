@@ -11,11 +11,13 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use("/Auth/api", authRoutes)
-app.use("/Rooms/api", roomRoutes)
-app.use("/Contact/api", contactRoutes)
-app.use("/Booking/api", bookingRoutes)
-app.use("/Payment/api", paymentRoutes)
+app.use("/Auth/api", authRoutes);
+app.use("/Rooms/api", roomRoutes);
+app.use("/Contact/api", contactRoutes);
+app.use("/Booking/api", bookingRoutes);
+app.use("/Payment/api", paymentRoutes);
 app.use("/api/admin", adminRoutes);
+
+// profile api pending
 
 export default app;
