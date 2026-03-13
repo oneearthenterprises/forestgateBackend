@@ -1,9 +1,14 @@
 import express from "express";
-import contactController from "../controllers/contactController.js";
+import {
+  createContext,
+  getAllContacts,
+  replyToContact,
+} from "../controllers/contactController.js";
 
 const router = express.Router();
 
-router.post("/create-contact", contactController.createContext);
-router.get("/contacts", contactController.getAllContacts);
+router.post("/create-contact", createContext);
+router.get("/contacts", getAllContacts);
+router.post("/reply-contact", replyToContact);
 
 export default router;
