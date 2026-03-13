@@ -361,6 +361,78 @@ const logoutUser = async (req, res) => {
   }
 };
 
+const updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+
+    // Prevent password update through this endpoint for safety
+    delete updateData.password;
+
+    const user = await Usermodel.findByIdAndUpdate(id, updateData, {
+      new: true,
+      runValidators: true,
+    }).select("-password");
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      message: "User updated successfully",
+      user,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+const deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await Usermodel.findByIdAndDelete(id);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      message: "User deleted successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await Usermodel.find({}, { password: 0 }).sort({
+      createdAt: -1,
+    });
+
+    return res.status(200).json({
+      message: "Users fetched successfully",
+      total: users.length,
+      users,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
 export default {
   registerUser,
   loginUser,
@@ -370,4 +442,7 @@ export default {
   resendForgotOtp,
   logoutUser,
   adminLogin,
+  getAllUsers,
+  updateUser,
+  deleteUser,
 };

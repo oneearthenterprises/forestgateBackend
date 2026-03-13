@@ -12,6 +12,9 @@ router.post("/reset-password", authController.resetPassword);
 router.post("/resend-forgot-otp", authController.resendForgotOtp);
 router.post("/logout", authController.logoutUser);
 router.post("/admin-login", authController.adminLogin);
+router.get("/users", authController.getAllUsers);
+router.put("/update-user/:id", authController.updateUser);
+router.delete("/delete-user/:id", authController.deleteUser);
 
 
 
