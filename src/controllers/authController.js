@@ -433,6 +433,40 @@ const getAllUsers = async (req, res) => {
   }
 };
 
+const getProfile = async (req, res) => {
+  try {
+    // User is already attached to req by authMiddleware
+    res.status(200).json({
+      user: req.user,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const updateProfile = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const updateData = req.body;
+
+    // Security: Do not allow password or role updates here
+    delete updateData.password;
+    delete updateData.role;
+
+    const updatedUser = await Usermodel.findByIdAndUpdate(userId, updateData, {
+      new: true,
+      runValidators: true,
+    }).select("-password");
+
+    res.status(200).json({
+      message: "Profile updated successfully",
+      user: updatedUser,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export default {
   registerUser,
   loginUser,
@@ -445,4 +479,6 @@ export default {
   getAllUsers,
   updateUser,
   deleteUser,
+  getProfile,
+  updateProfile,
 };

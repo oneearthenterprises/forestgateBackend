@@ -1,5 +1,6 @@
 import express from "express";
 import authController from "../controllers/authController.js";
+import authMiddleware from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
@@ -16,6 +17,8 @@ router.get("/users", authController.getAllUsers);
 router.put("/update-user/:id", authController.updateUser);
 router.delete("/delete-user/:id", authController.deleteUser);
 
-
+// Profile routes
+router.get("/me", authMiddleware, authController.getProfile);
+router.put("/update-profile", authMiddleware, authController.updateProfile);
 
 export default router;
