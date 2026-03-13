@@ -29,6 +29,10 @@ const roomSchema = new mongoose.Schema({
       default: Date.now
     }
   }],
+  tag: {
+    type: String,
+    default: "Premium Stay"
+  },
   videos: [{
     url: String,
     public_id: String,
