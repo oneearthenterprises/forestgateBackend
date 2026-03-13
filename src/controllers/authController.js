@@ -5,360 +5,369 @@ import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 dotenv.config();
 
-
-
 // admin routes
 
 const adminLogin = async (req, res) => {
-    try {
-        const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-        if (!email || !password) {
-            return res.status(400).json({
-                message: "Please fill all fields"
-            });
-        }
-
-        // Find user in DB
-        const admin = await Usermodel.findOne({ email });
-
-        if (!admin || admin.role !== "admin") {
-            return res.status(403).json({
-                message: "Access denied. Not an admin."
-            });
-        }
-
-        // Compare password
-        const isMatch = await bcrypt.compare(password, admin.password);
-
-        if (!isMatch) {
-            return res.status(401).json({
-                message: "Invalid credentials"
-            });
-        }
-
-        // Generate JWT
-        const token = jwt.sign(
-            { id: admin._id, role: admin.role },
-            process.env.JWT_SECRET,
-            { expiresIn: "7d" }
-        );
-
-        return res.status(200).json({
-            message: "Admin logged in successfully",
-            token
-        });
-
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({
-            message: error.message
-        });
+    if (!email || !password) {
+      return res.status(400).json({
+        message: "Please fill all fields",
+      });
     }
+
+    // Find user in DB
+    const admin = await Usermodel.findOne({ email });
+
+    if (!admin || admin.role !== "admin") {
+      return res.status(403).json({
+        message: "Access denied. Not an admin.",
+      });
+    }
+
+    // Compare password
+    const isMatch = await bcrypt.compare(password, admin.password);
+
+    if (!isMatch) {
+      return res.status(401).json({
+        message: "Invalid credentials",
+      });
+    }
+
+    // Generate JWT
+    const token = jwt.sign(
+      { id: admin._id, role: admin.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" },
+    );
+
+    return res.status(200).json({
+      message: "Admin logged in successfully",
+      token,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: error.message,
+    });
+  }
 };
 
-
 const registerUser = async (req, res) => {
-    try {
-        const { name, email, password, phone } = req.body;
-        if (!name || !email || !password || !phone) {
-            return res.status(400).json({
-                message: "Please fill all fields"
-            })
-        }
-        // check if user already exists
-        const alradyuser = await Usermodel.findOne({ email });
-        if (alradyuser) {
-            return res.status(409).json({
-                status: "false",
-                message: "You already exist"
-            })
-        }
-
-        // hide the password
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        // create the user
-        const user = await Usermodel.create({
-            name,
-            email,
-            password: hashedPassword,
-            phone
-        })
-
-        return res.status(201).json({
-            message: "User registered successfully",
-            user: {
-                id: user._id,
-                name: user.name,
-                email: user.email,
-                phone: user.phone,
-            }
-        })
-
-
-
-
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({
-            message: error.message
-        })
+  try {
+    const { name, email, password, phone, rememberMe } = req.body;
+    if (!name || !email || !password || !phone) {
+      return res.status(400).json({
+        message: "Please fill all fields",
+      });
     }
-}
+    // check if user already exists
+    const alradyuser = await Usermodel.findOne({ email });
+    if (alradyuser) {
+      return res.status(409).json({
+        status: "false",
+        message: "You already exist",
+      });
+    }
 
+    // hide the password
+    const hashedPassword = await bcrypt.hash(password, 10);
 
+    // create the user
+    const user = await Usermodel.create({
+      name,
+      email,
+      password: hashedPassword,
+      phone,
+      rememberMe,
+    });
+
+    return res.status(201).json({
+      message: "User registered successfully",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        rememberMe: rememberMe || false,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
 
 const loginUser = async (req, res) => {
-    try {
+  try {
+    const { email, password } = req.body;
 
-        const { email, password } = req.body;
-
-        if (!email || !password) {
-            return res.status(400).json({
-                message: "Please fill all fields"
-            })
-        }
-        // not alrady user
-
-
-        const user = await Usermodel.findOne({ email });
-        if (!user) {
-            return res.status(400).json({
-                message: "User Not Found Please Register first"
-            })
-        }
-
-        // check password
-        const isPasswordMatched = await bcrypt.compare(password, user.password);
-        if (!isPasswordMatched) {
-            return res.status(400).json({
-                message: "Invalid Password"
-            })
-        }
-
-        // generate token
-
-
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
-
-        return res.status(200).json({
-            message: "User logged in successfully",
-            user: {
-                id: user._id,
-                name: user.name,
-                email: user.email
-            },
-            token
-        })
-
-
-
-
-
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({
-            message: error.message
-        })
+    if (!email || !password) {
+      return res.status(400).json({
+        message: "Please fill all fields",
+      });
     }
-}
+    // not alrady user
 
+    const user = await Usermodel.findOne({ email });
+    if (!user) {
+      return res.status(400).json({
+        message: "User Not Found Please Register first",
+      });
+    }
+
+    // check password
+    const isPasswordMatched = await bcrypt.compare(password, user.password);
+    if (!isPasswordMatched) {
+      return res.status(400).json({
+        message: "Invalid Password",
+      });
+    }
+
+    // generate token
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1d",
+    });
+
+    return res.status(200).json({
+      message: "User logged in successfully",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+      },
+      token,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
 
 const sendForgotOtp = async (req, res) => {
-    try {
-        const { email } = req.body;
+  try {
+    const { email } = req.body;
 
-        if (!email) {
-            return res.status(400).json({ message: "Email is required" });
-        }
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
 
-        const user = await Usermodel.findOne({ email });
-        if (!user) {
-            return res.status(200).json({
-                message: "If account exists, OTP sent"
-            });
-        }
+    const user = await Usermodel.findOne({ email });
+    if (!user) {
+      return res.status(200).json({
+        message: "If account exists, OTP sent",
+      });
+    }
 
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-        user.otp = await bcrypt.hash(otp, 10);
-        user.otpExpire = Date.now() + 10 * 60 * 1000;
-        user.isOtpVerified = false;
-        user.otpLastSentAt = Date.now();
-        await user.save();
+    user.otp = await bcrypt.hash(otp, 10);
+    user.otpExpire = Date.now() + 10 * 60 * 1000;
+    user.isOtpVerified = false;
+    user.otpLastSentAt = Date.now();
+    await user.save();
 
-        const transporter = nodemailer.createTransport({
-            service: "gmail",
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS
-            }
-        });
+    const transporter = nodemailer.createTransport({
+      host: "mail.forestgatetrails.com",
+      port: 465,
+      secure: true,
+      auth: {
+        user: "admin@forestgatetrails.com",
+        pass: process.env.EMAIL_PASS,
+      },
+    });
 
-        await transporter.sendMail({
-            from: `"ForestGate" <${process.env.EMAIL_USER}>`,
-            to: email,
-            subject: "Reset Password OTP",
-            html: `
+    await transporter.sendMail({
+      from: `"ForestGate" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: "Reset Password OTP",
+      html: `
         <h2>Reset Password</h2>
         <h1>${otp}</h1>
         <p>Valid for 10 minutes</p>
-      `
-        });
+      `,
+    });
 
-        res.status(200).json({ message: "OTP sent to email" });
-
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
+    res.status(200).json({ message: "OTP sent to email" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
-
-
-
 
 const verifyForgotOtp = async (req, res) => {
-    try {
-        const { email, otp } = req.body;
+  try {
+    const { email, otp } = req.body;
 
-        if (!email || !otp) {
-            return res.status(400).json({ message: "Email & OTP required" });
-        }
-
-        const user = await Usermodel.findOne({
-            email,
-            otpExpire: { $gt: Date.now() }
-        });
-
-        if (!user) {
-            return res.status(400).json({ message: "OTP expired or invalid" });
-        }
-
-        const isValid = await bcrypt.compare(otp, user.otp);
-        if (!isValid) {
-            return res.status(400).json({ message: "Invalid OTP" });
-        }
-
-        user.isOtpVerified = true;
-        await user.save();
-
-        res.status(200).json({
-            message: "OTP verified"
-        });
-
-    } catch (err) {
-        res.status(500).json({ message: err.message });
+    if (!email || !otp) {
+      return res.status(400).json({ message: "Email & OTP required" });
     }
+
+    const user = await Usermodel.findOne({
+      email,
+      otpExpire: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "OTP expired or invalid" });
+    }
+
+    const isValid = await bcrypt.compare(otp, user.otp);
+    if (!isValid) {
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
+
+    user.isOtpVerified = true;
+    await user.save();
+
+    res.status(200).json({
+      message: "OTP verified",
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
-
-
-
 
 const resetPassword = async (req, res) => {
-    try {
-        const { email, newPassword } = req.body;
+  try {
+    const { email, newPassword } = req.body;
 
-        if (!email || !newPassword) {
-            return res.status(400).json({ message: "Missing fields" });
-        }
-
-        const user = await Usermodel.findOne({ email });
-
-        if (!user || !user.isOtpVerified) {
-            return res.status(403).json({
-                message: "OTP verification required"
-            });
-        }
-
-        user.password = await bcrypt.hash(newPassword, 10);
-        user.otp = undefined;
-        user.otpExpire = undefined;
-        user.isOtpVerified = false;
-
-        await user.save();
-
-        res.status(200).json({
-            message: "Password reset successfully"
-        });
-
-    } catch (err) {
-        res.status(500).json({ message: err.message });
+    if (!email || !newPassword) {
+      return res.status(400).json({ message: "Missing fields" });
     }
+
+    const user = await Usermodel.findOne({ email });
+
+    if (!user || !user.isOtpVerified) {
+      return res.status(403).json({
+        message: "OTP verification required",
+      });
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    user.otp = undefined;
+    user.otpExpire = undefined;
+    user.isOtpVerified = false;
+
+    await user.save();
+
+    const transporter = nodemailer.createTransport({
+      host: "mail.forestgatetrails.com",
+      port: 465,
+      secure: true,
+      auth: {
+        user: "admin@forestgatetrails.com",
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    await transporter.sendMail({
+      from: `"ForestGate" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: "Password Reset Successfully",
+      html: `
+      <div style="font-family: sans-serif; padding: 20px; border: 1px solid #ddd; border-radius: 8px; max-width: 400px; margin: 0 auto;">
+       <div style="text-align: center; margin-bottom: 20px;">
+        <img src="https://res.cloudinary.com/dehi93v0v/image/upload/v1741843340/logo_q3z70t.png" alt="Logo" style="width: 100px; height: 100px;">
+       </div>
+      <h2>Password Reset Successfully</h2>
+        <p>Time: ${new Date().toLocaleString()}</p>
+        <p>Your password has been reset successfully</p>
+      </div>
+      `,
+    });
+
+    res.status(200).json({
+      message: "Password reset successfully",
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
 
-
-
 const resendForgotOtp = async (req, res) => {
-    try {
-        const { email } = req.body;
+  try {
+    const { email } = req.body;
 
-        if (!email) {
-            return res.status(400).json({ message: "Email is required" });
-        }
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
 
-        const user = await Usermodel.findOne({ email });
-        if (!user) {
-            // security reason: same message
-            return res.status(200).json({
-                message: "If account exists, OTP has been resent"
-            });
-        }
+    const user = await Usermodel.findOne({ email });
+    if (!user) {
+      // security reason: same message
+      return res.status(200).json({
+        message: "If account exists, OTP has been resent",
+      });
+    }
 
-        // ⏳ Rate limit: 1 OTP per 60 sec
-        if (
-            user.otpLastSentAt &&
-            Date.now() - user.otpLastSentAt < 60 * 1000
-        ) {
-            return res.status(429).json({
-                message: "Please wait before requesting another OTP"
-            });
-        }
+    // ⏳ Rate limit: 1 OTP per 60 sec
+    if (user.otpLastSentAt && Date.now() - user.otpLastSentAt < 60 * 1000) {
+      return res.status(429).json({
+        message: "Please wait before requesting another OTP",
+      });
+    }
 
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-        user.otp = await bcrypt.hash(otp, 10);
-        user.otpExpire = Date.now() + 10 * 60 * 1000;
-        user.otpLastSentAt = Date.now();
-        await user.save();
+    user.otp = await bcrypt.hash(otp, 10);
+    user.otpExpire = Date.now() + 10 * 60 * 1000;
+    user.otpLastSentAt = Date.now();
+    await user.save();
 
-        const transporter = nodemailer.createTransport({
-            service: "gmail",
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS
-            }
-        });
+    const transporter = nodemailer.createTransport({
+      host: "mail.forestgatetrails.com",
+      port: 465,
+      secure: true,
+      auth: {
+        user: "admin@forestgatetrails.com",
+        pass: process.env.EMAIL_PASS,
+      },
+    });
 
-        await transporter.sendMail({
-            from: `"ForestGate" <${process.env.EMAIL_USER}>`,
-            to: email,
-            subject: "Resend OTP - Reset Password",
-            html: `
+    await transporter.sendMail({
+      from: `"ForestGate" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: "Resend OTP - Reset Password",
+      html: `
         <h2>Reset Password</h2>
         <p>Your new OTP:</p>
         <h1>${otp}</h1>
         <p>Valid for 10 minutes.</p>
-      `
-        });
+      `,
+    });
 
-        res.status(200).json({
-            message: "OTP resent successfully"
-        });
-
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+    res.status(200).json({
+      message: "OTP resent successfully",
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 const logoutUser = async (req, res) => {
-    try {
-        res.clearCookie("token");
-        res.status(200).json({
-            message: "User logged out successfully"
-        });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+  try {
+    res.clearCookie("token");
+    res.status(200).json({
+      message: "User logged out successfully",
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
-export default { registerUser, loginUser, sendForgotOtp, verifyForgotOtp, resetPassword, resendForgotOtp, logoutUser,adminLogin }
+export default {
+  registerUser,
+  loginUser,
+  sendForgotOtp,
+  verifyForgotOtp,
+  resetPassword,
+  resendForgotOtp,
+  logoutUser,
+  adminLogin,
+};
