@@ -1,6 +1,7 @@
 import express from "express";
 import authController from "../controllers/authController.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
+import upload from "../middlewares/uploadMiddleware.js";
 
 const router = express.Router();
 
@@ -19,6 +20,6 @@ router.delete("/delete-user/:id", authController.deleteUser);
 
 // Profile routes
 router.get("/me", authMiddleware, authController.getProfile);
-router.put("/update-profile", authMiddleware, authController.updateProfile);
+router.put("/update-profile", authMiddleware, upload.single("profileImage"), authController.updateProfile);
 
 export default router;

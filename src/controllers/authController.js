@@ -1,7 +1,9 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import Usermodel from "../models/user.js";
+import cloudinary from "../config/cloudinary.js";
 import nodemailer from "nodemailer";
+import { sendForgotOtpEmail, sendResetSuccessEmail } from "../services/emailService.js";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -173,26 +175,7 @@ const sendForgotOtp = async (req, res) => {
     user.otpLastSentAt = Date.now();
     await user.save();
 
-    const transporter = nodemailer.createTransport({
-      host: "mail.forestgatetrails.com",
-      port: 465,
-      secure: true,
-      auth: {
-        user: "admin@forestgatetrails.com",
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
-    await transporter.sendMail({
-      from: `"ForestGate" <${process.env.EMAIL_USER}>`,
-      to: email,
-      subject: "Reset Password OTP",
-      html: `
-        <h2>Reset Password</h2>
-        <h1>${otp}</h1>
-        <p>Valid for 10 minutes</p>
-      `,
-    });
+    await sendForgotOtpEmail(email, otp);
 
     res.status(200).json({ message: "OTP sent to email" });
   } catch (err) {
@@ -256,31 +239,7 @@ const resetPassword = async (req, res) => {
 
     await user.save();
 
-    const transporter = nodemailer.createTransport({
-      host: "mail.forestgatetrails.com",
-      port: 465,
-      secure: true,
-      auth: {
-        user: "admin@forestgatetrails.com",
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
-    await transporter.sendMail({
-      from: `"ForestGate" <${process.env.EMAIL_USER}>`,
-      to: email,
-      subject: "Password Reset Successfully",
-      html: `
-      <div style="font-family: sans-serif; padding: 20px; border: 1px solid #ddd; border-radius: 8px; max-width: 400px; margin: 0 auto;">
-       <div style="text-align: center; margin-bottom: 20px;">
-        <img src="https://res.cloudinary.com/dehi93v0v/image/upload/v1741843340/logo_q3z70t.png" alt="Logo" style="width: 100px; height: 100px;">
-       </div>
-      <h2>Password Reset Successfully</h2>
-        <p>Time: ${new Date().toLocaleString()}</p>
-        <p>Your password has been reset successfully</p>
-      </div>
-      `,
-    });
+    await sendResetSuccessEmail(email);
 
     res.status(200).json({
       message: "Password reset successfully",
@@ -447,7 +406,21 @@ const getProfile = async (req, res) => {
 const updateProfile = async (req, res) => {
   try {
     const userId = req.user._id;
-    const updateData = req.body;
+    const updateData = { ...req.body };
+
+    // Handle image upload if a file is present
+    if (req.file) {
+      try {
+        const result = await cloudinary.uploader.upload(req.file.path, {
+          folder: "profile_images",
+          resource_type: "auto",
+        });
+        updateData.profileImage = result.secure_url;
+      } catch (uploadError) {
+        console.error("Cloudinary Upload Error:", uploadError);
+        return res.status(500).json({ message: "Failed to upload image to Cloudinary" });
+      }
+    }
 
     // Security: Do not allow password or role updates here
     delete updateData.password;

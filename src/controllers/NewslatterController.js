@@ -36,6 +36,7 @@ export const newsletter = async (req, res) => {
         <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #ffffff; margin: 20px auto; border-spacing: 0;">
           <tr>
             <td align="center" style="padding: 40px 20px 20px 20px;">
+              <img src="https://res.cloudinary.com/djglckvn7/image/upload/v1773398383/forest_agte_123345_1_1_kix8vd.svg" alt="Forest Gate Logo" style="width: 180px; margin-bottom: 30px;">
               <h1 style="font-family: 'Times New Roman', Times, serif; font-size: 64px; margin: 0; color: #111;">Hello!</h1>
               <p style="font-family: Arial, sans-serif; font-size: 14px; font-weight: bold; letter-spacing: 1px; color: #333; margin: 10px 0 0 0; text-transform: uppercase;">Welcome to the world<br>of Forest Gate</p>
             </td>
@@ -172,6 +173,7 @@ export const sendNewsletter = async (req, res) => {
         <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #ffffff; margin: 20px auto; border-spacing: 0;">
           <tr>
             <td align="center" style="padding: 40px 20px 20px 20px;">
+              <img src="https://res.cloudinary.com/djglckvn7/image/upload/v1773398383/forest_agte_123345_1_1_kix8vd.svg" alt="Forest Gate Logo" style="width: 180px; margin-bottom: 20px;">
               <h1 style="font-family: 'Times New Roman', Times, serif; font-size: 64px; margin: 0; color: #111;">Forest Gate</h1>
             </td>
           </tr>

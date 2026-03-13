@@ -115,6 +115,27 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    profileImage: {
+      type: String,
+      default: "",
+    },
+    dob: {
+      type: String,
+      default: "",
+    },
+    anniversaryDate: {
+      type: String,
+      default: "",
+    },
+    occupation: {
+      type: String,
+      enum: ["Business Owner", "Salaried", ""],
+      default: "",
+    },
+    companyName: {
+      type: String,
+      default: "",
+    },
   },
   {
     timestamps: true,
