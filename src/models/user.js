@@ -136,6 +136,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    corporatePartyOptions: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

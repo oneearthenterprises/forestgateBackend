@@ -3,7 +3,11 @@ import jwt from "jsonwebtoken";
 import Usermodel from "../models/user.js";
 import cloudinary from "../config/cloudinary.js";
 import nodemailer from "nodemailer";
-import { sendForgotOtpEmail, sendResetSuccessEmail } from "../services/emailService.js";
+import {
+  sendForgotOtpEmail,
+  sendResetSuccessEmail,
+  verifyOtpRegisterOtp,
+} from "../services/emailService.js";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -56,47 +60,100 @@ const adminLogin = async (req, res) => {
   }
 };
 
+export const verifyOtpRegister = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({
+        message: "Email and OTP required",
+      });
+    }
+
+    const user = await Usermodel.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    if (user.otp !== otp) {
+      return res.status(400).json({
+        message: "Invalid OTP",
+      });
+    }
+
+    if (user.otpExpire < new Date()) {
+      return res.status(400).json({
+        message: "OTP expired",
+      });
+    }
+
+    user.isOtpVerified = true;
+    user.otp = "";
+    user.otpExpire = null;
+
+    await user.save();
+
+    res.status(200).json({
+      message: "OTP verified successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
 const registerUser = async (req, res) => {
   try {
     const { name, email, password, phone, rememberMe } = req.body;
+
     if (!name || !email || !password || !phone) {
       return res.status(400).json({
         message: "Please fill all fields",
       });
     }
-    // check if user already exists
-    const alradyuser = await Usermodel.findOne({ email });
-    if (alradyuser) {
+
+    const existingUser = await Usermodel.findOne({ email });
+
+    if (existingUser) {
+      if (!existingUser.isOtpVerified) {
+        return res.status(409).json({
+          message: "OTP verification pending. Please verify your email.",
+        });
+      }
+
       return res.status(409).json({
-        status: "false",
         message: "You already exist",
       });
     }
 
-    // hide the password
     const hashedPassword = await bcrypt.hash(password, 10);
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // create the user
     const user = await Usermodel.create({
       name,
       email,
       password: hashedPassword,
       phone,
       rememberMe,
+      otp,
+      otpExpire: Date.now() + 10 * 60 * 1000,
+      isOtpVerified: false,
     });
 
+    await verifyOtpRegisterOtp(email, otp);
+
     return res.status(201).json({
-      message: "User registered successfully",
+      message: "User registered successfully. OTP sent.",
       user: {
         id: user._id,
-        name: user.name,
         email: user.email,
-        phone: user.phone,
-        rememberMe: rememberMe || false,
       },
     });
   } catch (error) {
-    console.log(error);
     res.status(500).json({
       message: error.message,
     });
@@ -407,7 +464,8 @@ const updateProfile = async (req, res) => {
   try {
     const userId = req.user._id;
     const updateData = { ...req.body };
-
+    updateData.corporatePartyOptions =
+      req.body.corporatePartyOptions === "true";
     // Handle image upload if a file is present
     if (req.file) {
       try {
@@ -418,7 +476,9 @@ const updateProfile = async (req, res) => {
         updateData.profileImage = result.secure_url;
       } catch (uploadError) {
         console.error("Cloudinary Upload Error:", uploadError);
-        return res.status(500).json({ message: "Failed to upload image to Cloudinary" });
+        return res
+          .status(500)
+          .json({ message: "Failed to upload image to Cloudinary" });
       }
     }
 
@@ -454,4 +514,5 @@ export default {
   deleteUser,
   getProfile,
   updateProfile,
+  verifyOtpRegister,
 };

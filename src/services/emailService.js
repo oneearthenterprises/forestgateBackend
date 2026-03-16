@@ -176,6 +176,71 @@ const getResetSuccessTemplate = () => `
 </html>
 `;
 
+const getVerifyOtpTemplate = (otp) => `
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background:#f4f4f4;
+  padding:0;
+  margin:0;
+}
+.container{
+  max-width:600px;
+  margin:20px auto;
+  background:white;
+}
+.content{
+  padding:40px;
+  text-align:center;
+}
+.otp{
+  font-size:32px;
+  font-weight:bold;
+  letter-spacing:8px;
+  margin:20px 0;
+  color:#111;
+}
+.footer{
+  background:#a8aca1;
+  padding:20px;
+  color:white;
+  text-align:center;
+}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="content">
+<h2>Email Verification</h2>
+<p>Your OTP for account verification:</p>
+<div class="otp">${otp}</div>
+<p>This OTP is valid for 10 minutes.</p>
+</div>
+<div class="footer">
+Forest Gate
+</div>
+</div>
+</body>
+</html>
+`;
+
+export const verifyOtpRegisterOtp = async (email, otp) => {
+  try {
+    await transporter.sendMail({
+      from: `"ForestGate" <admin@forestgatetrails.com>`,
+      to: email,
+      subject: "Verify OTP - Forest Gate",
+      html: getVerifyOtpTemplate(otp),
+    });
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 export const sendBirthdayEmail = async (email, name) => {
   try {
     await transporter.sendMail({
