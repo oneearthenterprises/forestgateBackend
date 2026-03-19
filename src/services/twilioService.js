@@ -125,6 +125,37 @@ const sendBookingPendingGuestWhatsApp = async (booking) => {
 };
 
 /**
+ * Sends a WhatsApp notification to the GUEST when their payment is received.
+ * @param {Object} booking - The booking object.
+ */
+const sendPaymentConfirmationWhatsApp = async (booking) => {
+  try {
+    const twilioClient = getTwilioClient();
+    if (!twilioClient) return { sid: "mock_sid", status: "skipped" };
+
+    const message =
+      `*Payment Received - Forest Gate Sanctuary*\n\n` +
+      `Dear ${booking.fullName},\n` +
+      `Thank you! We have successfully received your payment of *₹${booking.totalAmount.toLocaleString()}* for your booking *${booking.bookingId || booking._id}*.\n\n` +
+      `*Current Status:* Paid ✅\n\n` +
+      `Thanks for paying, you are always welcome! 🙏\n\n` +
+      `You can view and download your invoice from your dashboard at any time. We look forward to hosting you soon!`;
+
+    const response = await twilioClient.messages.create({
+      body: message,
+      from: twilioNumber,
+      to: `whatsapp:${booking.phone.startsWith("+") ? booking.phone : "+91" + booking.phone}`,
+    });
+
+    console.log(`Payment WhatsApp notification sent: ${response.sid}`);
+    return { sid: response.sid, status: response.status };
+  } catch (error) {
+    console.error("Twilio Payment Confirmation Error:", error.message);
+    return { error: error.message, status: "failed" };
+  }
+};
+
+/**
  * Sends a WhatsApp notification to the GUEST when their booking is cancelled.
  * @param {Object} booking - The booking object.
  */
@@ -169,4 +200,5 @@ export default {
   sendBookingConfirmationWhatsApp,
   sendBookingPendingGuestWhatsApp,
   sendCancellationGuestWhatsApp,
+  sendPaymentConfirmationWhatsApp,
 };

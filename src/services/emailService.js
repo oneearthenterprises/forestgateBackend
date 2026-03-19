@@ -468,6 +468,7 @@ export const sendBookingCancelledEmail = async (booking) => {
     console.error(`Error sending cancellation email to ${booking.email}:`, error);
   }
 };
+
 const getPaymentConfirmationUserTemplate = (booking) => `
 <!DOCTYPE html>
 <html>
@@ -475,40 +476,109 @@ const getPaymentConfirmationUserTemplate = (booking) => `
     <meta charset="UTF-8">
     <style>
         body { font-family: 'Times New Roman', Times, serif; background-color: #f4f4f4; margin: 0; padding: 0; }
-        .container { max-width: 600px; background-color: #ffffff; margin: 20px auto; border: 1px solid #c6f6d5; }
+        .container { max-width: 650px; background-color: #ffffff; margin: 20px auto; border: 1px solid #c6f6d5; }
         .header { background-color: #2f855a; padding: 40px; text-align: center; color: #fff; }
         .header h1 { font-size: 28px; margin: 0; }
         .content { padding: 40px; }
-        .details { background-color: #f0fff4; padding: 20px; border: 1px solid #c6f6d5; margin: 20px 0; }
-        .details p { margin: 10px 0; font-size: 14px; color: #2f855a; }
-        .cta-button { display: inline-block; padding: 12px 24px; background-color: #2f855a; color: #ffffff !important; text-decoration: none; border-radius: 4px; font-weight: bold; margin-top: 20px; }
-        .footer { background-color: #a8aca1; padding: 20px; text-align: center; color: #fff; font-size: 12px; }
+        .details-box { background-color: #f0fff4; padding: 25px; border: 1px solid #c6f6d5; margin: 20px 0; border-radius: 8px; }
+        .details-box h3 { margin-top: 0; color: #2f855a; border-bottom: 1px solid #c6f6d5; padding-bottom: 10px; font-size: 18px; }
+        .grid { display: grid; grid-template-cols: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .item { margin: 8px 0; font-size: 14px; color: #2d3748; }
+        .label { font-weight: bold; color: #4a5568; }
+        
+        .invoice-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .invoice-table th { text-align: left; padding: 12px; background-color: #f7fafc; border-bottom: 2px solid #edf2f7; color: #4a5568; font-size: 12px; text-transform: uppercase; }
+        .invoice-table td { padding: 12px; border-bottom: 1px solid #edf2f7; font-size: 14px; }
+        .total-row { font-weight: bold; background-color: #f0fff4; }
+        
+        .section-title { font-size: 16px; font-weight: bold; color: #2f855a; margin: 25px 0 10px 0; text-transform: uppercase; letter-spacing: 1px; }
+        .info-text { font-size: 14px; color: #4a5568; line-height: 1.6; background: #f7fafc; padding: 15px; border-radius: 4px; }
+        
+        .cta-button { display: inline-block; padding: 14px 28px; background-color: #2f855a; color: #ffffff !important; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 25px; text-align: center; }
+        .footer { background-color: #a8aca1; padding: 25px; text-align: center; color: #fff; font-size: 12px; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>Payment Received</h1>
+            <img src="https://res.cloudinary.com/djglckvn7/image/upload/v1773398383/forest_agte_123345_1_1_kix8vd.svg" alt="Forest Gate Logo" style="width: 120px; margin-bottom: 15px; filter: brightness(0) invert(1);">
+            <h1>Payment Confirmation</h1>
             <p>Forest Gate Sanctuary</p>
         </div>
         <div class="content">
             <h2>Dear ${booking.fullName},</h2>
-            <p>Thank you! We have successfully received your payment for the booking at Forest Gate Sanctuary.</p>
+            <p>Thank you for your payment! We have successfully received the funds for your upcoming stay at Forest Gate Sanctuary. Your reservation is now fully secured.</p>
             
-            <div class="details">
-                <p><strong>Booking ID:</strong> ${booking.bookingId || booking._id}</p>
-                <p><strong>Amount Paid:</strong> ₹${booking.totalAmount.toLocaleString()}</p>
-                <p><strong>Payment Status:</strong> Paid</p>
+            <div class="details-box">
+                <h3>Booking Summary</h3>
+                <div class="grid">
+                    <div class="item"><span class="label">Booking ID:</span> ${booking.bookingId || booking._id}</div>
+                    <div class="item"><span class="label">Status:</span> <span style="color: #2f855a; font-weight: bold;">Paid</span></div>
+                    <div class="item"><span class="label">Check-in:</span> ${new Date(booking.checkIn).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' })}</div>
+                    <div class="item"><span class="label">Check-out:</span> ${new Date(booking.checkOut).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' })}</div>
+                </div>
             </div>
 
-            <p>You can now view and download your invoice from your dashboard.</p>
-            
-            <a href="https://forestgatetrails.com/my-bookings" class="cta-button">View My Bookings</a>
+            <div class="section-title">Guest Details & Members</div>
+            <div class="info-text">
+                <p><strong>Lead Guest:</strong> ${booking.fullName}</p>
+                <p><strong>Total Guests:</strong> ${booking.guests?.adults || 0} Adults, ${booking.guests?.children || 0} Children</p>
+                ${booking.guestDetails && booking.guestDetails.length > 0 ? `
+                    <p><strong>Members List:</strong></p>
+                    <ul style="margin: 5px 0; padding-left: 20px;">
+                        ${booking.guestDetails.map(guest => `<li>${guest.name} (${guest.type}${guest.age ? `, Age: ${guest.age}` : ''})</li>`).join('')}
+                    </ul>
+                ` : ''}
+            </div>
 
-            <p>We look forward to hosting you soon!</p>
+            <div class="section-title">Financial Summary / Invoice</div>
+            <table class="invoice-table">
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th style="text-align: right;">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Stay: ${booking.roomName || 'Sanctuary Accommodation'} (${booking.totalNights} Nights)</td>
+                        <td style="text-align: right;">₹${((booking.pricePerNight || 0) * (booking.totalNights || 0)).toLocaleString()}</td>
+                    </tr>
+                    ${booking.addons && booking.addons.length > 0 ? booking.addons.filter(a => a.status !== "cancelled").map(addon => `
+                        <tr>
+                            <td>Add-on: ${addon.name}</td>
+                            <td style="text-align: right;">₹${(addon.price || 0).toLocaleString()}</td>
+                        </tr>
+                    `).join('') : ''}
+                    <tr class="total-row">
+                        <td>TOTAL PAID</td>
+                        <td style="text-align: right;">₹${booking.totalAmount.toLocaleString()}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            ${booking.specialRequest ? `
+                <div class="section-title">Special Requests</div>
+                <div class="info-text">${booking.specialRequest}</div>
+            ` : ''}
+
+            ${booking.notes ? `
+                <div class="section-title">Stay Notes</div>
+                <div class="info-text">${booking.notes}</div>
+            ` : ''}
+
+            <div style="text-align: center;">
+                <a href="https://forestgatetrails.com/my-bookings" class="cta-button">Manage My Booking</a>
+            </div>
+
+            <p style="margin-top: 30px; font-size: 14px; color: #718096; text-align: center;">
+                If you have any further requirements or changes, please feel free to reach out to us.
+            </p>
         </div>
         <div class="footer">
-            <p>&copy; ${new Date().getFullYear()} Forest Gate Sanctuary. All rights reserved.</p>
+            <p><strong>The Forest Gate Sanctuary</strong></p>
+            <p>Sanctuary Trails, Nature Reserve</p>
+            <p>&copy; ${new Date().getFullYear()} Forest Gate. All rights reserved.</p>
         </div>
     </div>
 </body>

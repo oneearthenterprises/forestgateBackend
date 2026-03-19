@@ -430,6 +430,7 @@ const updateBooking = async (req, res) => {
         if (updateData.paymentStatus === "Paid" && oldBooking.paymentStatus !== "Paid") {
             sendPaymentConfirmationToUser(booking);
             sendPaymentConfirmationToAdmin(booking);
+            twilioService.sendPaymentConfirmationWhatsApp(booking);
         }
 
         // 🚀 Sync vital info to User Profile (Syncing only to Booking Profile, not Account)
