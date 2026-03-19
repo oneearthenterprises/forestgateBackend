@@ -24,6 +24,11 @@ const userSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    userId: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
     otp: String,
     otpExpire: Date,
     isOtpVerified: {
@@ -64,7 +69,20 @@ const userSchema = new mongoose.Schema(
       of: String,
       default: {},
     },
-    // Booking Information
+    // Primary Booking Profile (Separate from Account Registration)
+    bookingName: {
+      type: String,
+      default: "",
+    },
+    bookingEmail: {
+      type: String,
+      default: "",
+    },
+    bookingPhone: {
+      type: String,
+      default: "",
+    },
+    // Legacy / Additional Booking Information
     bookingPersonName: {
       type: String,
       default: "",

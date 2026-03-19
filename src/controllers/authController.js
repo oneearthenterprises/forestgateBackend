@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import Usermodel from "../models/user.js";
 import cloudinary from "../config/cloudinary.js";
 import nodemailer from "nodemailer";
+import Booking from "../models/booking.js";
 import {
   sendForgotOtpEmail,
   sendResetSuccessEmail,
@@ -23,27 +24,19 @@ const adminLogin = async (req, res) => {
       });
     }
 
-    // Find user in DB
-    const admin = await Usermodel.findOne({ email });
+    // Static admin credentials check
+    const isAdminEmail = email === "adminforestgate@gmail.com";
+    const isAdminPassword = password === "adminforestgate";
 
-    if (!admin || admin.role !== "admin") {
-      return res.status(403).json({
-        message: "Access denied. Not an admin.",
-      });
-    }
-
-    // Compare password
-    const isMatch = await bcrypt.compare(password, admin.password);
-
-    if (!isMatch) {
+    if (!isAdminEmail || !isAdminPassword) {
       return res.status(401).json({
         message: "Invalid credentials",
       });
     }
 
-    // Generate JWT
+    // Generate JWT for static admin
     const token = jwt.sign(
-      { id: admin._id, role: admin.role },
+      { id: "static-admin-id", role: "admin" },
       process.env.JWT_SECRET,
       { expiresIn: "7d" },
     );
@@ -132,6 +125,9 @@ const registerUser = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const timestampPart = Date.now().toString().slice(-4);
+    const randomPart = Math.floor(1000 + Math.random() * 9000).toString();
+    const userId = `FG-USER-${timestampPart}${randomPart}`;
 
     const user = await Usermodel.create({
       name,
@@ -142,6 +138,7 @@ const registerUser = async (req, res) => {
       otp,
       otpExpire: Date.now() + 10 * 60 * 1000,
       isOtpVerified: false,
+      userId,
     });
 
     await verifyOtpRegisterOtp(email, otp);
@@ -432,14 +429,32 @@ const deleteUser = async (req, res) => {
 
 const getAllUsers = async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const total = await Usermodel.countDocuments();
     const users = await Usermodel.find({}, { password: 0 }).sort({
       createdAt: -1,
-    });
+    })
+    .skip(skip)
+    .limit(limit)
+    .lean();
+
+    // Fetch booking counts and arrays for each user
+    const usersWithBookingData = await Promise.all(users.map(async (user) => {
+        const userBookings = await Booking.find({ email: user.email }, { bookingId: 1, _id: 1 }).lean();
+        const count = userBookings.length;
+        const bookingIds = userBookings.map(b => b.bookingId || b._id.toString());
+        return { ...user, bookingCount: count, bookingIds };
+    }));
 
     return res.status(200).json({
       message: "Users fetched successfully",
-      total: users.length,
-      users,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+      users: usersWithBookingData,
     });
   } catch (error) {
     console.log(error);

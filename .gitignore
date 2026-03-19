@@ -2,8 +2,8 @@
 node_modules/
 
 # env files
-# .env
-# .env.local
+.env
+.env.local
 
 # build output
 .next/
@@ -18,3 +18,7 @@ yarn-error.log*
 # OS files
 .DS_Store
 Thumbs.db
+
+
+
+echo .env >> .gitignore

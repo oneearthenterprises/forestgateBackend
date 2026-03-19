@@ -97,11 +97,21 @@ export const newsletter = async (req, res) => {
 
 export const getNewsletter = async (req, res) => {
   try {
-    const users = await Newslatter.find().sort({ createdAt: -1 });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const total = await Newslatter.countDocuments();
+    const users = await Newslatter.find()
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
 
     return res.status(200).json({
       message: "Newsletter users fetched successfully",
-      total: users.length,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
       users,
     });
   } catch (error) {

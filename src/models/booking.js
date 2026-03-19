@@ -2,10 +2,15 @@ import mongoose from "mongoose";
 
 const bookingSchema = new mongoose.Schema(
   {
+    bookingId: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
     room: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "RoomLists",
-      required: true,
+      required: false,
     },
 
     checkIn: {
@@ -60,6 +65,66 @@ const bookingSchema = new mongoose.Schema(
       enum: ["pending", "confirmed", "cancelled"],
       default: "pending",
     },
+    paymentStatus: {
+      type: String,
+      enum: ["Unpaid", "Paid", "Partially Paid"],
+      default: "Unpaid",
+    },
+
+    cancellationReasons: {
+      type: [String],
+      default: [],
+    },
+
+    cancellationNote: {
+      type: String,
+      default: "",
+    },
+
+    cancelledAt: {
+      type: Date,
+    },
+    twilioMessageSid: {
+      type: String,
+      default: "",
+    },
+    notificationStatus: {
+      type: String,
+      default: "none",
+    },
+    roomName: {
+      type: String,
+      default: "",
+    },
+    guestDetails: [
+      {
+        name: String,
+        gender: String,
+        age: String,
+        type: { type: String, default: "adult" }
+      }
+    ],
+    notes: {
+      type: String,
+      default: "",
+    },
+    specialRequest: {
+      type: String,
+      default: "",
+    },
+    customFields: [
+      {
+        key: { type: String, default: "" },
+        value: { type: String, default: "" }
+      }
+    ],
+    addons: [
+      {
+        name: { type: String, default: "" },
+        price: { type: Number, default: 0 },
+        status: { type: String, default: "active" } // "active" or "cancelled"
+      }
+    ],
   },
   { timestamps: true },
 );

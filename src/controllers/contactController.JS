@@ -29,9 +29,21 @@ const createContext = async (req, res) => {
 // GET ALL MESSAGES (Admin)
 const getAllContacts = async (req, res) => {
   try {
-    const contact = await ContactUs.find().sort({ createdAt: -1 });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const total = await ContactUs.countDocuments();
+    const contact = await ContactUs.find()
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
     return res.status(200).json({
       message: "Contacts fetched successfully",
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
       contact,
     });
   } catch (error) {
