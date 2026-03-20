@@ -30,6 +30,10 @@ const createBooking = async (req, res) => {
             specialRequest,
             notes,
             addons,
+            mattressRequired,
+            extraBedRequired,
+            allocation,
+            totalRooms,
         } = req.body;
 
         // 🔹 Basic validation
@@ -115,6 +119,10 @@ const createBooking = async (req, res) => {
             totalNights,
             totalAmount,
             addons: finalAddons,
+            mattressRequired: mattressRequired || false,
+            extraBedRequired: extraBedRequired || false,
+            allocation: allocation || [],
+            totalRooms: totalRooms || 1,
             status: "pending",
         });
 

@@ -10,6 +10,14 @@ const roomSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+  maxAdults: {
+    type: Number,
+    default: 2
+  },
+  maxChildren: {
+    type: Number,
+    default: 0
+  },
   shortDescription: {
     type: String,
     default: ""

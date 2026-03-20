@@ -12,7 +12,9 @@ const createRoom = async (req, res) => {
             shortDescription,
             fullDescription,
             amenities,
-            tag
+            tag,
+            maxAdults,
+            maxChildren
         } = req.body;
 
         // Validate required fields
@@ -121,6 +123,8 @@ const createRoom = async (req, res) => {
             fullDescription: fullDescription || "",
             amenities: amenitiesArray,
             tag: tag || "Premium Stay",
+            maxAdults: maxAdults || 2,
+            maxChildren: maxChildren || 2,
             images: imageUrls,
             videos: videoUrls
         });
@@ -240,6 +244,8 @@ const updateRoom = async (req, res) => {
         room.shortDescription = req.body.shortDescription ?? room.shortDescription;
         room.fullDescription = req.body.fullDescription ?? room.fullDescription;
         room.tag = req.body.tag ?? room.tag;
+        room.maxAdults = req.body.maxAdults ?? room.maxAdults;
+        room.maxChildren = req.body.maxChildren ?? room.maxChildren;
 
         if (req.body.amenities) {
             room.amenities = Array.isArray(req.body.amenities)

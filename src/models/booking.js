@@ -92,6 +92,26 @@ const bookingSchema = new mongoose.Schema(
       type: String,
       default: "none",
     },
+    mattressRequired: {
+      type: Boolean,
+      default: false,
+    },
+    extraBedRequired: {
+      type: Boolean,
+      default: false,
+    },
+    totalRooms: {
+      type: Number,
+      default: 1,
+    },
+    allocation: [
+      {
+        adults: Number,
+        children: Number,
+        extraBedding: Boolean,
+        price: Number,
+      }
+    ],
     roomName: {
       type: String,
       default: "",
