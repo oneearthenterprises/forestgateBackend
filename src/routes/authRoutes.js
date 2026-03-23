@@ -17,6 +17,7 @@ router.get("/users", authController.getAllUsers);
 router.put("/update-user/:id", authController.updateUser);
 router.delete("/delete-user/:id", authController.deleteUser);
 router.post("/verify-otp-register", authController.verifyOtpRegister);
+router.post("/resend-registration-otp", authController.resendRegistrationOtp);
 
 // Profile routes
 router.get("/me", authMiddleware, authController.getProfile);

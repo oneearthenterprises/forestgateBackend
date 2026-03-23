@@ -363,6 +363,48 @@ const resendForgotOtp = async (req, res) => {
   }
 };
 
+const resendRegistrationOtp = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    const user = await Usermodel.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.isOtpVerified) {
+      return res.status(400).json({ message: "Email already verified" });
+    }
+
+    // ⏳ Rate limit: 1 OTP per 60 sec
+    if (user.otpLastSentAt && Date.now() - user.otpLastSentAt < 60 * 1000) {
+      return res.status(429).json({
+        message: "Please wait before requesting another OTP",
+      });
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    user.otp = otp; // Plain string for registration
+    user.otpExpire = Date.now() + 10 * 60 * 1000;
+    user.otpLastSentAt = Date.now();
+    await user.save();
+
+    await verifyOtpRegisterOtp(email, otp);
+
+    res.status(200).json({
+      message: "Verification code resent successfully",
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 const logoutUser = async (req, res) => {
   try {
     res.clearCookie("token");
@@ -530,4 +572,5 @@ export default {
   getProfile,
   updateProfile,
   verifyOtpRegister,
+  resendRegistrationOtp,
 };
