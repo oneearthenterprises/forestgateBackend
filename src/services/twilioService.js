@@ -218,6 +218,7 @@ const sendPaymentConfirmationWhatsApp = async (booking) => {
       `Dear ${booking.fullName},\n` +
       `Thank you! We have successfully received your payment of *₹${getDynamicTotal(booking).toLocaleString()}* for your booking *${booking.bookingId || booking._id}*.\n\n` +
       `*Current Status:* Paid ✅\n\n` +
+      `*Cancellation Policy:* Full refund only if cancelled 48 hours before check-in.\n\n` +
       `Thanks for paying, you are always welcome! 🙏\n\n` +
       `You can view and download your invoice from your dashboard at any time. We look forward to hosting you soon!`;
 
