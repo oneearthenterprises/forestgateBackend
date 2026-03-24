@@ -10,18 +10,29 @@ import {
   verifyOtpRegisterOtp,
 } from "../services/emailService.js";
 import dotenv from "dotenv";
+import { verifyRecaptcha } from "../utils/recaptcha.js";
 dotenv.config();
 
 // admin routes
 
 const adminLogin = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, recaptchaToken } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({
         message: "Please fill all fields",
       });
+    }
+
+    // Verify reCAPTCHA token
+    if (recaptchaToken || process.env.NODE_ENV === 'production') {
+      const isValid = await verifyRecaptcha(recaptchaToken);
+      if (!isValid) {
+        return res.status(403).json({
+          message: "reCAPTCHA verification failed. Please try again.",
+        });
+      }
     }
 
     // Static admin credentials check
@@ -159,12 +170,22 @@ const registerUser = async (req, res) => {
 
 const loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, recaptchaToken } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({
         message: "Please fill all fields",
       });
+    }
+
+    // Verify reCAPTCHA token
+    if (recaptchaToken || process.env.NODE_ENV === 'production') {
+      const isValid = await verifyRecaptcha(recaptchaToken);
+      if (!isValid) {
+        return res.status(403).json({
+          message: "reCAPTCHA verification failed. Please try again.",
+        });
+      }
     }
     // not alrady user
 

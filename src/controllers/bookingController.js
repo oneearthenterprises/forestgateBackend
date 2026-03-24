@@ -11,6 +11,7 @@ import {
     sendPaymentConfirmationToUser,
     sendPaymentConfirmationToAdmin
 } from "../services/emailService.js";
+import { verifyRecaptcha } from "../utils/recaptcha.js";
 
 /* =========================
    CREATE BOOKING
@@ -34,6 +35,7 @@ const createBooking = async (req, res) => {
             extraBedRequired,
             allocation,
             totalRooms,
+            recaptchaToken,
         } = req.body;
 
         // 🔹 Basic validation
@@ -49,6 +51,17 @@ const createBooking = async (req, res) => {
             return res
                 .status(400)
                 .json({ message: "Please fill all required fields" });
+        }
+
+        // 🔹 Verify reCAPTCHA token if provided or if in production
+        const shouldVerify = recaptchaToken || process.env.NODE_ENV === 'production';
+        if (shouldVerify) {
+            const isValid = await verifyRecaptcha(recaptchaToken);
+            if (!isValid) {
+                return res.status(403).json({
+                    message: "reCAPTCHA verification failed. Please try again.",
+                });
+            }
         }
 
         // 🔹 Handle Manual Room Selection (Admin)
@@ -91,7 +104,12 @@ const createBooking = async (req, res) => {
         const bookingIdValue = `FOREST-${timestampPart}${randomPart}`;
 
         // 🔥 SERVER decides amount (or uses manual price)
-        const basePrice = totalNights * finalPricePerNight;
+        let basePrice = totalNights * finalPricePerNight;
+        if (allocation && allocation.length > 0) {
+            const allocationSum = allocation.reduce((sum, r) => sum + (Number(r.price) || 0), 0);
+            basePrice = totalNights * allocationSum;
+        }
+        
         const finalAddons = addons || [];
         const addonsPrice = finalAddons.reduce((sum, addon) => {
             if (addon.status === "cancelled") return sum;
@@ -136,7 +154,7 @@ const createBooking = async (req, res) => {
         }
 
         // 🚀 Send Twilio Request Received Notification to Guest
-        twilioService.sendBookingPendingGuestWhatsApp(booking);
+        await twilioService.sendBookingPendingGuestWhatsApp(booking);
 
         // 📧 Send Booking Received Email to Guest
         sendBookingReceivedEmail(booking);
@@ -274,7 +292,7 @@ const cancelBooking = async (req, res) => {
         // 🚀 Send WhatsApp Notification for cancellation to Guest
 
         // 🚀 Send WhatsApp Notification for cancellation to Guest
-        twilioService.sendCancellationGuestWhatsApp(booking);
+        await twilioService.sendCancellationGuestWhatsApp(booking);
 
         // 📧 Send Booking Cancelled Email to Guest
         sendBookingCancelledEmail(booking);
@@ -335,10 +353,10 @@ const updateBookingStatus = async (req, res) => {
             // 🚀 If status changed to confirmed or cancelled, send notifications
             if (oldBooking.status !== "confirmed" && status === "confirmed") {
                 sendBookingConfirmationEmail(booking);
-                twilioService.sendBookingConfirmationWhatsApp(booking);
+                await twilioService.sendBookingConfirmationWhatsApp(booking);
             } else if (oldBooking.status !== "cancelled" && status === "cancelled") {
                 sendBookingCancelledEmail(booking);
-                twilioService.sendCancellationGuestWhatsApp(booking);
+                await twilioService.sendCancellationGuestWhatsApp(booking);
             }
 
             // Sync status to User profile
@@ -412,7 +430,12 @@ const updateBooking = async (req, res) => {
             updateData.totalNights = totalNights;
         }
 
-        const basePrice = totalNights * newPricePerNight;
+        let basePrice = totalNights * newPricePerNight;
+        const currentAllocation = updateData.allocation || oldBooking.allocation || [];
+        if (currentAllocation && currentAllocation.length > 0) {
+            const allocationSum = currentAllocation.reduce((sum, r) => sum + (Number(r.price) || 0), 0);
+            basePrice = totalNights * allocationSum;
+        }
         const addonsPrice = finalAddons.reduce((sum, addon) => {
             if (addon.status === "cancelled") return sum;
             return sum + (Number(addon.price) || 0);
@@ -428,17 +451,17 @@ const updateBooking = async (req, res) => {
         // 🚀 If status changed to confirmed or cancelled, send notifications
         if (updateData.status === "confirmed" && oldBooking.status !== "confirmed") {
             sendBookingConfirmationEmail(booking);
-            twilioService.sendBookingConfirmationWhatsApp(booking);
+            await twilioService.sendBookingConfirmationWhatsApp(booking);
         } else if (updateData.status === "cancelled" && oldBooking.status !== "cancelled") {
             sendBookingCancelledEmail(booking);
-            twilioService.sendCancellationGuestWhatsApp(booking);
+            await twilioService.sendCancellationGuestWhatsApp(booking);
         }
 
         // 🚀 If paymentStatus changed to Paid, send notifications
         if (updateData.paymentStatus === "Paid" && oldBooking.paymentStatus !== "Paid") {
             sendPaymentConfirmationToUser(booking);
             sendPaymentConfirmationToAdmin(booking);
-            twilioService.sendPaymentConfirmationWhatsApp(booking);
+            await twilioService.sendPaymentConfirmationWhatsApp(booking);
         }
 
         // 🚀 Sync vital info to User Profile (Syncing only to Booking Profile, not Account)

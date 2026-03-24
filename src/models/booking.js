@@ -106,6 +106,7 @@ const bookingSchema = new mongoose.Schema(
     },
     allocation: [
       {
+        name: String,
         adults: Number,
         children: Number,
         extraBedding: Boolean,

@@ -3,15 +3,55 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const transporter = nodemailer.createTransport({
-  host: "mail.forestgatetrails.com",
-  port: 465,
-  secure: true,
-  auth: {
-    user: "admin@forestgatetrails.com",
-    pass: process.env.EMAIL_PASS,
-  },
-});
+const isGmail = process.env.EMAIL_USER?.includes('gmail.com');
+
+const transporter = nodemailer.createTransport(
+  isGmail ? {
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  } : {
+    host: "mail.forestgatetrails.com",
+    port: 465,
+    secure: true,
+    auth: {
+      user: "admin@forestgatetrails.com",
+      pass: process.env.EMAIL_PASS,
+    },
+    tls: {
+      rejectUnauthorized: false // Helps with self-signed certificates on custom hosts
+    }
+  }
+);
+
+/**
+ * Helper to get formatted room list
+ */
+const getRoomListStr = (booking, fallbackRoomName = "Sanctuary Stay") => {
+  if (booking.allocation && booking.allocation.length > 0) {
+    return booking.allocation.map(r => r.name || booking.bookingType || fallbackRoomName).join(", ");
+  }
+  return booking.roomName || booking.bookingType || fallbackRoomName;
+};
+
+/**
+ * Helper to dynamically calculate total based on allocation
+ */
+const getDynamicTotal = (booking) => {
+  if (!booking) return 0;
+  const inDate = new Date(booking.checkIn);
+  const outDate = new Date(booking.checkOut);
+  const nights = Math.max(1, Math.ceil((outDate - inDate) / (1000 * 60 * 60 * 24)));
+  
+  if (booking.allocation && booking.allocation.length > 0) {
+    const allocSum = booking.allocation.reduce((sum, r) => sum + (Number(r.price) || 0), 0);
+    const addonsSum = (booking.addons || []).filter(a => a.status !== "cancelled").reduce((s, a) => s + (Number(a.price) || 0), 0);
+    return (allocSum * nights) + addonsSum;
+  }
+  return Number(booking.totalAmount) || 0;
+};
 
 const getBirthdayTemplate = (name) => `
 <!DOCTYPE html>
@@ -214,6 +254,9 @@ body {
 </head>
 <body>
 <div class="container">
+<div class="header">
+    <img src="https://res.cloudinary.com/djglckvn7/image/upload/v1773398383/forest_agte_123345_1_1_kix8vd.svg" alt="Forest Gate Logo" style="width: 120px; margin-bottom: 20px;">
+</div>
 <div class="content">
 <h2>Email Verification</h2>
 <p>Your OTP for account verification:</p>
@@ -230,6 +273,10 @@ Forest Gate
 
 export const verifyOtpRegisterOtp = async (email, otp) => {
   try {
+    console.log('\n' + '='.repeat(50));
+    console.log(`[AUTH] REGISTRATION OTP FOR ${email}: ${otp}`);
+    console.log('='.repeat(50) + '\n');
+    
     await transporter.sendMail({
       from: `"ForestGate" <admin@forestgatetrails.com>`,
       to: email,
@@ -237,7 +284,7 @@ export const verifyOtpRegisterOtp = async (email, otp) => {
       html: getVerifyOtpTemplate(otp),
     });
   } catch (error) {
-    console.error(error);
+    console.error("Email Sending Error:", error);
   }
 };
 
@@ -295,7 +342,9 @@ export const sendResetSuccessEmail = async (email) => {
   } catch (error) {
     console.error(`Error sending reset success email to ${email}:`, error);
   }
-};const getBookingConfirmationTemplate = (booking) => `
+};
+
+const getBookingConfirmationTemplate = (booking) => `
 <!DOCTYPE html>
 <html>
 <head>
@@ -315,6 +364,7 @@ export const sendResetSuccessEmail = async (email) => {
 <body>
     <div class="container">
         <div class="header">
+            <img src="https://res.cloudinary.com/djglckvn7/image/upload/v1773398383/forest_agte_123345_1_1_kix8vd.svg" alt="Forest Gate Logo" style="width: 150px; margin-bottom: 20px; filter: brightness(0) invert(1);">
             <h1>Booking Confirmed</h1>
             <p>Forest Gate Sanctuary</p>
         </div>
@@ -324,14 +374,14 @@ export const sendResetSuccessEmail = async (email) => {
             
             <div class="details">
                 <p><strong>Booking ID:</strong> ${booking.bookingId || booking._id}</p>
-                <p><strong>Room:</strong> ${booking.roomName || 'Sanctuary Stay'}</p>
+                <p><strong>Rooms:</strong> ${getRoomListStr(booking)}</p>
                 <p><strong>Check-in:</strong> ${new Date(booking.checkIn).toLocaleDateString()}</p>
                 <p><strong>Check-out:</strong> ${new Date(booking.checkOut).toLocaleDateString()}</p>
-                <p><strong>Total Amount:</strong> ₹${booking.totalAmount.toLocaleString()}</p>
+                <p><strong>Total Amount:</strong> ₹${getDynamicTotal(booking).toLocaleString()}</p>
             </div>
 
             <p class="policy">
-                IMPORTANT: Cancellations with a full refund are only available up to 10 days before your reaching the resort (${new Date(booking.checkIn).toLocaleDateString()}). Otherwise, the booking is non-refundable and cannot be cancelled.
+                IMPORTANT: Cancellations with a full refund are only available up to 48 hours before check-in (${new Date(booking.checkIn).toLocaleDateString()}). Otherwise, the booking is non-refundable and cannot be cancelled.
             </p>
 
             <p>If you have any questions, please reply to this email or contact us via WhatsApp.</p>
@@ -377,6 +427,7 @@ const getBookingReceivedTemplate = (booking) => `
 <body>
     <div class="container">
         <div class="header">
+            <img src="https://res.cloudinary.com/djglckvn7/image/upload/v1773398383/forest_agte_123345_1_1_kix8vd.svg" alt="Forest Gate Logo" style="width: 150px; margin-bottom: 20px;">
             <h1>Booking Request Received</h1>
             <p>Forest Gate Sanctuary</p>
         </div>
@@ -386,7 +437,7 @@ const getBookingReceivedTemplate = (booking) => `
             
             <div class="details">
                 <p><strong>Status:</strong> Pending Confirmation</p>
-                <p><strong>Room:</strong> ${booking.roomName || 'Sanctuary Stay'}</p>
+                <p><strong>Rooms:</strong> ${getRoomListStr(booking)}</p>
                 <p><strong>Check-in:</strong> ${new Date(booking.checkIn).toLocaleDateString()}</p>
                 <p><strong>Check-out:</strong> ${new Date(booking.checkOut).toLocaleDateString()}</p>
             </div>
@@ -420,6 +471,7 @@ const getBookingCancelledTemplate = (booking) => `
 <body>
     <div class="container">
         <div class="header">
+            <img src="https://res.cloudinary.com/djglckvn7/image/upload/v1773398383/forest_agte_123345_1_1_kix8vd.svg" alt="Forest Gate Logo" style="width: 150px; margin-bottom: 20px; filter: brightness(0) invert(1);">
             <h1>Booking Cancelled</h1>
             <p>Forest Gate Sanctuary</p>
         </div>
@@ -541,8 +593,12 @@ const getPaymentConfirmationUserTemplate = (booking) => `
                 </thead>
                 <tbody>
                     <tr>
-                        <td>Stay: ${booking.roomName || 'Sanctuary Accommodation'} (${booking.totalNights} Nights)</td>
-                        <td style="text-align: right;">₹${((booking.pricePerNight || 0) * (booking.totalNights || 0)).toLocaleString()}</td>
+                        <td>Stay: ${getRoomListStr(booking)} (${booking.totalNights} Nights)</td>
+                        <td style="text-align: right;">₹${(
+                            (booking.allocation && booking.allocation.length > 0)
+                            ? (booking.allocation.reduce((sum, r) => sum + (Number(r.price) || 0), 0) * (booking.totalNights || 1))
+                            : ((booking.pricePerNight || 0) * (booking.totalNights || 1))
+                        ).toLocaleString()}</td>
                     </tr>
                     ${booking.addons && booking.addons.length > 0 ? booking.addons.filter(a => a.status !== "cancelled").map(addon => `
                         <tr>
@@ -552,7 +608,7 @@ const getPaymentConfirmationUserTemplate = (booking) => `
                     `).join('') : ''}
                     <tr class="total-row">
                         <td>TOTAL PAID</td>
-                        <td style="text-align: right;">₹${booking.totalAmount.toLocaleString()}</td>
+                        <td style="text-align: right;">₹${getDynamicTotal(booking).toLocaleString()}</td>
                     </tr>
                 </tbody>
             </table>
@@ -602,6 +658,7 @@ const getPaymentConfirmationAdminTemplate = (booking) => `
 <body>
     <div class="container">
         <div class="header">
+            <img src="https://res.cloudinary.com/djglckvn7/image/upload/v1773398383/forest_agte_123345_1_1_kix8vd.svg" alt="Forest Gate Logo" style="width: 120px; margin-bottom: 15px; filter: brightness(0) invert(1);">
             <h2>New Payment Alert</h2>
         </div>
         <div class="content">
@@ -609,7 +666,7 @@ const getPaymentConfirmationAdminTemplate = (booking) => `
             <div class="details">
                 <p><strong>User:</strong> ${booking.fullName} (${booking.email})</p>
                 <p><strong>Booking ID:</strong> ${booking.bookingId || booking._id}</p>
-                <p><strong>Amount:</strong> ₹${booking.totalAmount.toLocaleString()}</p>
+                <p><strong>Amount:</strong> ₹${getDynamicTotal(booking).toLocaleString()}</p>
                 <p><strong>Phone:</strong> ${booking.phone}</p>
             </div>
             <p>Visit the admin dashboard to manage bookings.</p>
