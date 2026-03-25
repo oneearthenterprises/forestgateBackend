@@ -122,7 +122,8 @@ const bookingSchema = new mongoose.Schema(
         name: String,
         gender: String,
         age: String,
-        type: { type: String, default: "adult" }
+        type: { type: String, default: "adult" },
+        assignedRoom: { type: String, default: "" }
       }
     ],
     notes: {

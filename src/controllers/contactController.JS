@@ -87,48 +87,47 @@ const replyToContact = async (req, res) => {
       : "";
 
     const emailHtml = `
-        <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0;">
-            <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #ffffff; margin: 20px auto; border-spacing: 0;">
-                <tr>
-                    <td align="center" style="padding: 40px 20px 20px 20px;">
-                        <h1 style="font-family: 'Times New Roman', Times, serif; font-size: 64px; margin: 0; color: #111;">Forest Gate</h1>
-                    </td>
-                </tr>
-                <tr>
-                    <td align="left" style="padding: 40px 30px;">
-                        <h2 style="font-family: 'Times New Roman', Times, serif; font-size: 24px; font-weight: bold; color: #111; margin: 0 0 20px 0; text-transform: uppercase;">Reply: ${subject}</h2>
-                        <p style="font-family: 'Times New Roman', Times, serif; font-size: 16px; color: #555; line-height: 1.6; margin: 0 0 10px 0;">Hello ${contact.fullName},</p>
-                        <div style="font-family: 'Times New Roman', Times, serif; font-size: 16px; color: #555; line-height: 1.6; margin: 0 0 30px 0;">
-                            ${formattedMessage}
-                        </div>
-                        <p style="font-family: 'Times New Roman', Times, serif; font-size: 14px; color: #888; border-left: 3px solid #ccc; padding-left: 10px; margin: 30px 0 30px 0; font-style: italic;">
-                            <strong>Your Original Message:</strong><br/>
-                            ${contact.message.replace(/\n/g, "<br />")}
-                        </p>
-                        <a href="https://forestgatetrails.com" style="font-family: 'Times New Roman', Times, serif; font-size: 16px; color: #111; text-decoration: underline; font-style: italic;">Visit our website</a>
-                    </td>
-                </tr>
-                <tr>
-                    <td align="center" style="background-color: #a8aca1; padding: 30px 20px;">
-                        <p style="font-family: 'Times New Roman', Times, serif; font-size: 16px; color: #fff; font-style: italic; margin: 0 0 15px 0;">Follow Forest Gate</p>
-                        <table border="0" cellpadding="0" cellspacing="0" align="center">
-                            <tr>
-                                <td style="padding: 0 10px;">
-                                    <a href="#" style="color: #fff; text-decoration: none; font-family: Arial, sans-serif; font-size: 24px;">X</a>
-                                </td>
-                                <td style="padding: 0 10px;">
-                                    <a href="#" style="color: #fff; text-decoration: none; font-family: Arial, sans-serif; font-size: 24px;">f</a>
-                                </td>
-                                <td style="padding: 0 10px;">
-                                    <a href="#" style="color: #fff; text-decoration: none; font-family: Arial, sans-serif; font-size: 24px;">O</a>
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
-            </table>
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap');
+          body { margin: 0; padding: 0; background-color: #f8f9fa; font-family: 'Inter', Arial, sans-serif; }
+          .container { max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.05); }
+          .header { padding: 40px; text-align: center; background-color: #ffffff; }
+          .logo { width: 140px; margin-bottom: 8px; }
+          .content { padding: 48px 40px; text-align: left; }
+          .title-text { font-family: 'Times New Roman', serif; font-size: 28px; font-weight: bold; color: #085d6b; margin: 0 0 24px 0; text-transform: uppercase; letter-spacing: 1px; }
+          .body-text { font-family: 'Times New Roman', serif; font-size: 18px; line-height: 1.8; color: #334155; margin-bottom: 32px; }
+          .original-msg { background-color: #f1f5f9; padding: 24px; border-radius: 12px; font-size: 14px; color: #64748b; line-height: 1.6; font-style: italic; margin-bottom: 32px; }
+          .footer { background-color: #085d6b; padding: 48px 40px; text-align: center; color: #ffffff; }
+          .cta-link { display: inline-block; font-family: 'Times New Roman', serif; font-size: 16px; color: #085d6b; text-decoration: underline; font-style: italic; font-weight: bold; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <img src="https://res.cloudinary.com/djglckvn7/image/upload/v1773398383/forest_agte_123345_1_1_kix8vd.svg" alt="Forest Gate" class="logo">
+          </div>
+          <div class="content">
+            <h2 class="title-text">Re: ${subject}</h2>
+            <p class="body-text">Hello ${contact.fullName},</p>
+            <div class="body-text">
+               ${formattedMessage}
+            </div>
+            <div class="original-msg">
+              <strong>Your Original Message:</strong><br/>
+              ${contact.message.replace(/\n/g, "<br />")}
+            </div>
+            <a href="${process.env.FRONTEND_URL || "http://localhost:9003"}" class="cta-link">Visit our website</a>
+          </div>
+          <div class="footer">
+            <p style="font-family: 'Times New Roman', serif; font-size: 18px; font-style: italic; opacity: 0.9;">Forest Gate Sanctuary</p>
+          </div>
         </div>
-        `;
+      </body>
+      </html>
+    `;
 
     await transporter.sendMail({
       from: `"ForestGate Support" <${process.env.EMAIL_USER}>`,

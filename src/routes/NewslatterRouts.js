@@ -3,6 +3,7 @@ import {
   newsletter,
   getNewsletter,
   sendNewsletter,
+  unsubscribe
 } from "../controllers/NewslatterController.js";
 import upload from "../middlewares/upload.js";
 
@@ -10,6 +11,7 @@ const router = express.Router();
 
 router.post("/newsletteremail", newsletter);
 router.get("/getnewsletter", getNewsletter);
+router.get("/unsubscribe", unsubscribe);
 router.post("/send", 
     (req, res, next) => {
         upload.fields([

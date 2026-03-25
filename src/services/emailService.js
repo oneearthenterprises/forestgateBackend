@@ -53,82 +53,88 @@ const getDynamicTotal = (booking) => {
   return Number(booking.totalAmount) || 0;
 };
 
-const getBirthdayTemplate = (name) => `
+const getBirthdayTemplate = (name, email) => `
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
     <style>
-        body { font-family: 'Times New Roman', Times, serif; background-color: #f4f4f4; margin: 0; padding: 0; }
-        .container { max-width: 600px; background-color: #ffffff; margin: 20px auto; border-spacing: 0; }
-        .header { padding: 40px 20px 20px 20px; text-align: center; }
-        .header h1 { font-size: 64px; margin: 0; color: #111; }
-        .header p { font-family: Arial, sans-serif; font-size: 14px; font-weight: bold; letter-spacing: 2px; color: #333; margin: 10px 0 0 0; text-transform: uppercase; }
-        .banner { width: 100%; display: block; }
-        .content { padding: 40px 30px; text-align: center; }
-        .content h2 { font-size: 28px; font-weight: bold; color: #111; margin: 0 0 20px 0; text-transform: uppercase; }
-        .content p { font-size: 18px; color: #555; line-height: 1.6; margin: 0 0 30px 0; font-style: italic; }
-        .cta { text-decoration: underline; color: #111; font-weight: bold; font-size: 16px; }
-        .footer { background-color: #a8aca1; padding: 30px 20px; text-align: center; color: #fff; }
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap');
+      body { margin: 0; padding: 0; background-color: #f8f9fa; font-family: 'Inter', Arial, sans-serif; }
+      .container { max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.05); }
+      .header { padding: 40px; text-align: center; background-color: #ffffff; }
+      .logo { width: 130px; margin-bottom: 24px; }
+      .hero-img { width: 100%; height: auto; display: block; }
+      .content { padding: 48px 40px; text-align: center; }
+      .title-text { font-family: 'Times New Roman', serif; font-size: 38px; font-weight: normal; color: #085d6b; margin: 0 0 16px 0; }
+      .body-text { font-family: 'Times New Roman', serif; font-size: 18px; line-height: 1.8; color: #334155; margin-bottom: 32px; font-style: italic; }
+      .cta-btn { display: inline-block; padding: 16px 32px; background-color: #085d6b; color: #ffffff !important; text-decoration: none; border-radius: 50px; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; }
+      .footer { background-color: #085d6b; padding: 40px; text-align: center; color: #ffffff; }
+      .unsubscribe { margin-top: 24px; font-size: 11px; opacity: 0.6; }
+      .unsubscribe a { color: #ffffff; text-decoration: underline; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <img src="https://res.cloudinary.com/djglckvn7/image/upload/v1773398383/forest_agte_123345_1_1_kix8vd.svg" alt="Forest Gate Logo" style="width: 150px; margin-bottom: 20px;">
-            <h1>Happy Birthday!</h1>
-            <p>Celebrate at Forest Gate</p>
+            <img src="https://res.cloudinary.com/djglckvn7/image/upload/v1773398383/forest_agte_123345_1_1_kix8vd.svg" alt="Forest Gate" class="logo">
         </div>
-        <img class="banner" src="https://images.unsplash.com/photo-1530103862676-fa8c9d34bb34?q=80&w=600&auto=format&fit=crop" alt="Birthday Celebration" />
+        <img class="hero-img" src="https://images.unsplash.com/photo-1542435503-956c469947f6?q=80&w=600&auto=format&fit=crop" alt="Celebration" />
         <div class="content">
-            <h2>Dear ${name},</h2>
-            <p>Warmest wishes on your special day! May your year ahead be filled with adventure, serenity, and beautiful moments.</p>
-            <p>As a birthday gift from us, enjoy a special treat on your next visit to Forest Gate Sanctuary.</p>
-            <a href="https://forestgatetrails.com" class="cta">Book Your Birthday Escape</a>
+            <h1 class="title-text">Happy Birthday, ${name}!</h1>
+            <p class="body-text">
+              Warmest wishes on your special day. May your coming year be as breathtaking as the Himalayan trails and as peaceful as the forest breeze. We have a special gift waiting for your next visit.
+            </p>
+            <a href="https://forestgatetrails.com" class="cta-btn">Claim Your Birthday Treat</a>
         </div>
         <div class="footer">
-            <p>Follow Forest Gate</p>
+            <p style="font-style: italic; opacity: 0.9;">Celebrate with Forest Gate</p>
+            <p class="unsubscribe">
+              <a href="${process.env.API_URL || "http://localhost:5000"}/api/newsletter/unsubscribe?email=${email}">Unsubscribe</a>
+            </p>
         </div>
     </div>
 </body>
 </html>
 `;
 
-const getAnniversaryTemplate = (name) => `
+const getAnniversaryTemplate = (name, email) => `
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
     <style>
-        body { font-family: 'Times New Roman', Times, serif; background-color: #f4f4f4; margin: 0; padding: 0; }
-        .container { max-width: 600px; background-color: #ffffff; margin: 20px auto; border-spacing: 0; }
-        .header { padding: 40px 20px 20px 20px; text-align: center; }
-        .header h1 { font-size: 64px; margin: 0; color: #111; }
-        .header p { font-family: Arial, sans-serif; font-size: 14px; font-weight: bold; letter-spacing: 2px; color: #333; margin: 10px 0 0 0; text-transform: uppercase; }
-        .banner { width: 100%; display: block; }
-        .content { padding: 40px 30px; text-align: center; }
-        .content h2 { font-size: 28px; font-weight: bold; color: #111; margin: 0 0 20px 0; text-transform: uppercase; }
-        .content p { font-size: 18px; color: #555; line-height: 1.6; margin: 0 0 30px 0; font-style: italic; }
-        .cta { text-decoration: underline; color: #111; font-weight: bold; font-size: 16px; }
-        .footer { background-color: #a8aca1; padding: 30px 20px; text-align: center; color: #fff; }
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap');
+      body { margin: 0; padding: 0; background-color: #f8f9fa; font-family: 'Inter', Arial, sans-serif; }
+      .container { max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.05); }
+      .header { padding: 40px; text-align: center; background-color: #ffffff; }
+      .logo { width: 130px; margin-bottom: 24px; }
+      .hero-img { width: 100%; height: auto; display: block; }
+      .content { padding: 48px 40px; text-align: center; }
+      .title-text { font-family: 'Times New Roman', serif; font-size: 38px; font-weight: normal; color: #085d6b; margin: 0 0 16px 0; }
+      .body-text { font-family: 'Times New Roman', serif; font-size: 18px; line-height: 1.8; color: #334155; margin-bottom: 32px; font-style: italic; }
+      .cta-btn { display: inline-block; padding: 16px 32px; background-color: #085d6b; color: #ffffff !important; text-decoration: none; border-radius: 50px; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; }
+      .footer { background-color: #085d6b; padding: 40px; text-align: center; color: #ffffff; }
+      .unsubscribe { margin-top: 24px; font-size: 11px; opacity: 0.6; }
+      .unsubscribe a { color: #ffffff; text-decoration: underline; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <img src="https://res.cloudinary.com/djglckvn7/image/upload/v1773398383/forest_agte_123345_1_1_kix8vd.svg" alt="Forest Gate Logo" style="width: 150px; margin-bottom: 20px;">
-            <h1>Happy Anniversary!</h1>
-            <p>Eternal Love at Forest Gate</p>
+            <img src="https://res.cloudinary.com/djglckvn7/image/upload/v1773398383/forest_agte_123345_1_1_kix8vd.svg" alt="Forest Gate" class="logo">
         </div>
-        <img class="banner" src="https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?q=80&w=600&auto=format&fit=crop" alt="Anniversary Celebration" />
+        <img class="hero-img" src="https://images.unsplash.com/photo-1542435503-956c469947f6?q=80&w=600&auto=format&fit=crop" alt="Anniversary" />
         <div class="content">
-            <h2>Dear ${name},</h2>
-            <p>Wishing you another year of love, laughter, and beautiful memories together. May your journey be as magical as the trails of Forest Gate.</p>
-            <p>Celebrate your milestone with a romantic stay at our sanctuary.</p>
-            <a href="https://forestgatetrails.com" class="cta">Plan Your Anniversary Getaway</a>
+            <h1 class="title-text">Happy Anniversary, ${name}!</h1>
+            <p class="body-text">
+              Wishing you another year of love and laughter. May your journey together remain as timeless and enchanting as the Himalayan sanctuary we call home.
+            </p>
+            <a href="https://forestgatetrails.com" class="cta-btn">Plan Your Romantic Stay</a>
         </div>
         <div class="footer">
-            <p>Follow Forest Gate</p>
+            <p style="font-style: italic; opacity: 0.9;">Celebrate with Forest Gate</p>
+            <p class="unsubscribe">
+              <a href="${process.env.API_URL || "http://localhost:5000"}/api/newsletter/unsubscribe?email=${email}">Unsubscribe</a>
+            </p>
         </div>
     </div>
 </body>
@@ -294,7 +300,7 @@ export const sendBirthdayEmail = async (email, name) => {
       from: `"ForestGate" <admin@forestgatetrails.com>`,
       to: email,
       subject: `Happy Birthday, ${name}! 🎂`,
-      html: getBirthdayTemplate(name),
+      html: getBirthdayTemplate(name, email),
     });
     console.log(`Birthday email sent to ${email}`);
   } catch (error) {
@@ -308,7 +314,7 @@ export const sendAnniversaryEmail = async (email, name) => {
       from: `"ForestGate" <admin@forestgatetrails.com>`,
       to: email,
       subject: `Happy Anniversary, ${name}! 🥂`,
-      html: getAnniversaryTemplate(name),
+      html: getAnniversaryTemplate(name, email),
     });
     console.log(`Anniversary email sent to ${email}`);
   } catch (error) {
@@ -349,45 +355,131 @@ const getBookingConfirmationTemplate = (booking) => `
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { font-family: 'Times New Roman', Times, serif; background-color: #f4f4f4; margin: 0; padding: 0; }
-        .container { max-width: 600px; background-color: #ffffff; margin: 20px auto; border: 1px solid #e0e0e0; }
-        .header { background-color: #111; padding: 40px; text-align: center; color: #fff; }
-        .header h1 { font-size: 32px; margin: 0; letter-spacing: 2px; }
-        .content { padding: 40px; }
-        .details { background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0; }
-        .details p { margin: 10px 0; font-size: 14px; color: #333; }
-        .policy { color: #d32f2f; font-weight: bold; border-top: 1px solid #eee; padding-top: 20px; margin-top: 20px; font-size: 13px; }
-        .footer { background-color: #a8aca1; padding: 20px; text-align: center; color: #fff; font-size: 12px; }
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+        .wrapper { width: 100%; table-layout: fixed; background-color: #f4f6f9; padding: 20px 0; }
+        .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+        .header { background-color: #111827; padding: 40px 20px; text-align: center; color: #ffffff; border-bottom: 4px solid #10b981; }
+        .header h1 { font-size: 28px; margin: 0; font-weight: 700; letter-spacing: 1px; }
+        .header p { color: #9ca3af; font-size: 14px; margin-top: 8px; letter-spacing: 2px; text-transform: uppercase; }
+        .content { padding: 40px 30px; }
+        .content h2 { font-size: 22px; color: #111827; margin-top: 0; margin-bottom: 20px; }
+        .intro-text { font-size: 15px; color: #4b5563; line-height: 1.6; margin-bottom: 25px; }
+        
+        .status-badge { display: inline-block; background-color: #d1fae5; color: #065f46; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; }
+        
+        .details-card { background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 25px; margin-bottom: 25px; }
+        .details-card h3 { margin: 0 0 15px 0; font-size: 16px; color: #111827; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .fallback-row { margin-bottom: 15px; }
+        .fallback-col { display: inline-block; width: 48%; vertical-align: top; }
+        
+        .detail-label { display: block; font-size: 11px; font-weight: bold; color: #6b7280; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+        .detail-value { font-weight: 600; font-size: 15px; color: #111827; }
+        
+        .price-row { background-color: #f3f4f6; padding: 15px 20px; border-radius: 6px; margin-top: 20px; display: table; width: 100%; box-sizing: border-box; }
+        .price-label { font-weight: 700; color: #374151; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; display: table-cell; vertical-align: middle; }
+        .price-value { font-weight: 800; font-size: 22px; color: #111827; display: table-cell; text-align: right; vertical-align: middle; }
+
+        .policy { background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 15px; font-size: 13px; color: #991b1b; line-height: 1.5; margin-top: 30px; font-weight: 500; }
+        
+        .footer { background-color: #f9fafb; padding: 30px; text-align: center; border-top: 1px solid #e5e7eb; }
+        .contact-info { font-size: 13px; color: #4b5563; line-height: 1.6; margin-bottom: 15px; }
+        .social-links a { color: #111827; text-decoration: none; font-weight: bold; font-size: 13px; margin: 0 10px; border-bottom: 1px solid #111827; }
+        .copyright { font-size: 11px; color: #9ca3af; margin-top: 20px; }
+        
+        @media only screen and (max-width: 600px) {
+            .container { width: 100% !important; border-radius: 0; box-shadow: none; border: none; }
+            .content { padding: 30px 20px; }
+            .fallback-col { width: 100%; display: block; margin-bottom: 15px; }
+            .price-row { display: block; text-align: left; }
+            .price-label, .price-value { display: block; text-align: left; }
+            .price-value { margin-top: 5px; }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <img src="https://res.cloudinary.com/djglckvn7/image/upload/v1773398383/forest_agte_123345_1_1_kix8vd.svg" alt="Forest Gate Logo" style="width: 150px; margin-bottom: 20px; filter: brightness(0) invert(1);">
-            <h1>Booking Confirmed</h1>
-            <p>Forest Gate Sanctuary</p>
-        </div>
-        <div class="content">
-            <h2>Dear ${booking.fullName},</h2>
-            <p>Your booking has been successfully confirmed at Forest Gate Sanctuary. We are excited to welcome you!</p>
-            
-            <div class="details">
-                <p><strong>Booking ID:</strong> ${booking.bookingId || booking._id}</p>
-                <p><strong>Rooms:</strong> ${getRoomListStr(booking)}</p>
-                <p><strong>Check-in:</strong> ${new Date(booking.checkIn).toLocaleDateString()}</p>
-                <p><strong>Check-out:</strong> ${new Date(booking.checkOut).toLocaleDateString()}</p>
-                <p><strong>Total Amount:</strong> ₹${getDynamicTotal(booking).toLocaleString()}</p>
+    <div class="wrapper">
+        <div class="container">
+            <div class="header">
+                <img src="https://res.cloudinary.com/djglckvn7/image/upload/v1773398383/forest_agte_123345_1_1_kix8vd.svg" alt="Forest Gate Logo" style="width: 140px; margin-bottom: 20px; filter: brightness(0) invert(1);">
+                <h1>Booking Confirmed</h1>
+                <p>Forest Gate Sanctuary</p>
             </div>
+            
+            <div class="content">
+                <h2>Dear ${booking.fullName},</h2>
+                <p class="intro-text">
+                    Your booking has been successfully confirmed at Forest Gate Sanctuary. We are thrilled to welcome you and ensure your stay is as serene as the forest itself!
+                </p>
+                
+                <div style="text-align: center;">
+                    <span class="status-badge">✓ Confirmed</span>
+                </div>
+                
+                <div class="details-card">
+                    <h3>Reservation Details</h3>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <span class="detail-label">Booking ID</span>
+                        <span class="detail-value" style="color: #4f46e5;">${booking.bookingId || booking._id}</span>
+                    </div>
 
-            <p class="policy">
-                IMPORTANT: Cancellations with a full refund are only available up to 48 hours before check-in (${new Date(booking.checkIn).toLocaleDateString()}). Otherwise, the booking is non-refundable and cannot be cancelled.
-            </p>
+                    <div class="fallback-row">
+                        <div class="fallback-col">
+                            <span class="detail-label">Check-In</span>
+                            <span class="detail-value">${new Date(booking.checkIn).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                        </div>
+                        <div class="fallback-col">
+                            <span class="detail-label">Check-Out</span>
+                            <span class="detail-value">${new Date(booking.checkOut).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <span class="detail-label">Sanctuary Accommodation</span>
+                        <span class="detail-value" style="display: block; line-height: 1.5;">${getRoomListStr(booking)}</span>
+                    </div>
+                    
+                    <div class="fallback-row">
+                        <div class="fallback-col">
+                            <span class="detail-label">Guests</span>
+                            <span class="detail-value">${booking.guests?.adults || booking.adults || 0} Adults, ${booking.guests?.children || booking.children || 0} Children</span>
+                        </div>
+                        <div class="fallback-col">
+                            <span class="detail-label">Duration</span>
+                            <span class="detail-value">${booking.totalNights || 1} Nights</span>
+                        </div>
+                    </div>
+                    
+                    <div class="price-row">
+                        <span class="price-label">Total Amount Paid</span>
+                        <span class="price-value">₹${getDynamicTotal(booking).toLocaleString()}</span>
+                    </div>
+                </div>
 
-            <p>If you have any questions, please reply to this email or contact us via WhatsApp.</p>
-        </div>
-        <div class="footer">
-            <p>&copy; ${new Date().getFullYear()} Forest Gate Sanctuary. All rights reserved.</p>
+                <div class="policy">
+                    <strong>IMPORTANT:</strong> Cancellations with a full refund are only available up to 48 hours before check-in (${new Date(booking.checkIn).toLocaleDateString()}). Otherwise, the booking is non-refundable and cannot be cancelled.
+                </div>
+            </div>
+            
+            <div class="footer">
+                <div class="contact-info">
+                    <strong>Forest Gate Sanctuary</strong><br>
+                    Need assistance? WhatsApp or call us at <a href="tel:+919876543210" style="color: #111827; text-decoration: none; font-weight: bold;">+91 98765 43210</a><br>
+                    <a href="https://forestgatetrails.com" style="color: #111827; text-decoration: underline;">www.forestgatetrails.com</a>
+                </div>
+                
+                <div class="social-links">
+                    <a href="https://instagram.com/forestgatetrails">Instagram</a>
+                    <a href="https://facebook.com/forestgatetrails">Facebook</a>
+                </div>
+                
+                <div class="copyright">
+                    &copy; ${new Date().getFullYear()} Forest Gate Sanctuary. All rights reserved.
+                </div>
+            </div>
         </div>
     </div>
 </body>
@@ -413,39 +505,130 @@ const getBookingReceivedTemplate = (booking) => `
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { font-family: 'Times New Roman', Times, serif; background-color: #f4f4f4; margin: 0; padding: 0; }
-        .container { max-width: 600px; background-color: #ffffff; margin: 20px auto; border: 1px solid #e0e0e0; }
-        .header { background-color: #f5f5f5; padding: 40px; text-align: center; color: #333; }
-        .header h1 { font-size: 28px; margin: 0; letter-spacing: 1px; }
-        .content { padding: 40px; }
-        .details { background-color: #fdfdfd; padding: 20px; border: 1px solid #eee; margin: 20px 0; }
-        .details p { margin: 10px 0; font-size: 14px; color: #444; }
-        .footer { background-color: #a8aca1; padding: 20px; text-align: center; color: #fff; font-size: 12px; }
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f7f9f7; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+        .wrapper { width: 100%; table-layout: fixed; background-color: #f7f9f7; padding: 20px 0; }
+        .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .header { background-color: #1a3622; padding: 40px 20px; text-align: center; color: #ffffff; }
+        .header h1 { font-size: 26px; margin: 0; font-weight: 600; letter-spacing: 1px; }
+        .header p { color: #8fa696; font-size: 14px; margin-top: 8px; letter-spacing: 2px; text-transform: uppercase; }
+        .content { padding: 40px 30px; }
+        .content h2 { font-size: 20px; color: #1a3622; margin-top: 0; }
+        .intro-text { font-size: 15px; color: #4a5568; line-height: 1.6; margin-bottom: 25px; }
+        
+        .status-badge { display: inline-block; background-color: #ffedd5; color: #c2410c; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; }
+        
+        .details-card { background-color: #f8faf9; border: 1px solid #e2e8e5; border-radius: 8px; padding: 25px; margin-bottom: 25px; }
+        .details-card h3 { margin: 0 0 15px 0; font-size: 16px; color: #1a3622; border-bottom: 1px solid #e2e8e5; padding-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .grid { display: grid; grid-template-cols: 1fr 1fr; gap: 15px; }
+        .detail-item { font-size: 14px; color: #2d3748; }
+        .detail-label { display: block; font-size: 11px; font-weight: bold; color: #718096; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+        .detail-value { font-weight: 500; font-size: 15px; color: #1a3622; }
+        
+        /* Fallback for email clients that don't support grid */
+        .fallback-row { margin-bottom: 15px; }
+        .fallback-col { display: inline-block; width: 48%; vertical-align: top; }
+        
+        .price-section { background-color: #1a3622; color: #ffffff; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 25px; }
+        .price-section p { margin: 0; font-size: 14px; color: #a1b5a5; text-transform: uppercase; letter-spacing: 1px; }
+        .price-section h2 { margin: 5px 0 0 0; font-size: 28px; color: #ffffff; }
+
+        .next-steps { background-color: #f7fafc; padding: 20px; border-left: 4px solid #1a3622; font-size: 14px; color: #4a5568; line-height: 1.5; }
+        
+        .footer { background-color: #f1f5f2; padding: 30px; text-align: center; border-top: 1px solid #e2e8e5; }
+        .contact-info { font-size: 13px; color: #4a5568; line-height: 1.6; margin-bottom: 15px; }
+        .contact-info strong { color: #1a3622; }
+        .social-links a { color: #1a3622; text-decoration: none; font-weight: bold; font-size: 13px; margin: 0 10px; border-bottom: 1px solid #1a3622; }
+        .copyright { font-size: 11px; color: #718096; margin-top: 20px; }
+        
+        @media only screen and (max-width: 600px) {
+            .container { width: 100% !important; border-radius: 0; }
+            .content { padding: 30px 20px; }
+            .grid { grid-template-cols: 1fr; }
+            .fallback-col { width: 100%; display: block; margin-bottom: 15px; }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <img src="https://res.cloudinary.com/djglckvn7/image/upload/v1773398383/forest_agte_123345_1_1_kix8vd.svg" alt="Forest Gate Logo" style="width: 150px; margin-bottom: 20px;">
-            <h1>Booking Request Received</h1>
-            <p>Forest Gate Sanctuary</p>
-        </div>
-        <div class="content">
-            <h2>Dear ${booking.fullName},</h2>
-            <p>Thank you for choosing Forest Gate Sanctuary. We have received your booking request and it is currently being reviewed by our team.</p>
-            
-            <div class="details">
-                <p><strong>Status:</strong> Pending Confirmation</p>
-                <p><strong>Rooms:</strong> ${getRoomListStr(booking)}</p>
-                <p><strong>Check-in:</strong> ${new Date(booking.checkIn).toLocaleDateString()}</p>
-                <p><strong>Check-out:</strong> ${new Date(booking.checkOut).toLocaleDateString()}</p>
+    <div class="wrapper">
+        <div class="container">
+            <div class="header">
+                <img src="https://res.cloudinary.com/djglckvn7/image/upload/v1773398383/forest_agte_123345_1_1_kix8vd.svg" alt="Forest Gate Logo" style="width: 140px; margin-bottom: 20px; filter: brightness(0) invert(1);">
+                <h1>Request Received</h1>
+                <p>Forest Gate Sanctuary</p>
             </div>
+            
+            <div class="content">
+                <h2>Dear ${booking.fullName},</h2>
+                <p class="intro-text">
+                    Thank you for choosing Forest Gate. We have successfully received your booking request for the dates below. Our team is currently reviewing it to secure your sanctuary escape.
+                </p>
+                
+                <div style="text-align: center;">
+                    <span class="status-badge">Pending Confirmation</span>
+                </div>
+                
+                <div class="details-card">
+                    <h3>Stay Details</h3>
+                    
+                    <div class="fallback-row">
+                        <div class="fallback-col">
+                            <span class="detail-label">Check-In</span>
+                            <span class="detail-value">${new Date(booking.checkIn).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                        </div>
+                        <div class="fallback-col">
+                            <span class="detail-label">Check-Out</span>
+                            <span class="detail-value">${new Date(booking.checkOut).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 20px;">
+                        <span class="detail-label">Sanctuary Accommodation</span>
+                        <span class="detail-value" style="display: block; margin-bottom: 15px;">${getRoomListStr(booking)}</span>
+                    </div>
+                    
+                    <div class="fallback-row">
+                        <div class="fallback-col">
+                            <span class="detail-label">Guests</span>
+                            <span class="detail-value">${booking.guests?.adults || booking.adults || 0} Adults, ${booking.guests?.children || booking.children || 0} Children</span>
+                        </div>
+                        <div class="fallback-col">
+                            <span class="detail-label">Total Duration</span>
+                            <span class="detail-value">${booking.totalNights || 1} Nights</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="price-section">
+                    <p>Estimated Total Rate</p>
+                    <h2>₹${getDynamicTotal(booking).toLocaleString()}</h2>
+                    <p style="font-size: 11px; margin-top: 5px; opacity: 0.8; text-transform: none;">* Includes all taxes and applicable fees</p>
+                </div>
 
-            <p>Once our team confirms your reservation, you will receive another email with final confirmation details.</p>
-        </div>
-        <div class="footer">
-            <p>&copy; ${new Date().getFullYear()} Forest Gate Sanctuary. All rights reserved.</p>
+                <div class="next-steps">
+                    <strong>What happens next?</strong><br>
+                    You will receive a final confirmation email shortly to finalize your payment securely. Please hang tight!
+                </div>
+            </div>
+            
+            <div class="footer">
+                <div class="contact-info">
+                    <strong>Forest Gate Sanctuary</strong><br>
+                    Have questions? Call or WhatsApp us at <a href="tel:+919876543210" style="color: #1a3622; text-decoration: none; font-weight: bold;">+91 98765 43210</a><br>
+                    <a href="https://forestgatetrails.com" style="color: #1a3622; text-decoration: underline;">www.forestgatetrails.com</a>
+                </div>
+                
+                <div class="social-links">
+                    <a href="https://instagram.com/forestgatetrails">Instagram</a>
+                    <a href="https://facebook.com/forestgatetrails">Facebook</a>
+                </div>
+                
+                <div class="copyright">
+                    &copy; ${new Date().getFullYear()} Forest Gate Sanctuary. All rights reserved.
+                </div>
+            </div>
         </div>
     </div>
 </body>

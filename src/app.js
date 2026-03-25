@@ -8,6 +8,7 @@ import paymentRoutes from "./routes/paymentRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import newsletterRoutes from "./routes/NewslatterRouts.js";
 import welcomePopupRoutes from "./routes/welcomePopupRoutes.js";
+import blogRoutes from "./routes/blogRoutes.js";
 const app = express();
 
 app.use(cors());
@@ -23,6 +24,7 @@ app.use("/api/admin", adminRoutes);
 // newslatter api
 app.use("/api/newsletter", newsletterRoutes);
 app.use("/api/welcome-popup", welcomePopupRoutes);
+app.use("/api/blogs", blogRoutes);
 
 // profile api pending
 
