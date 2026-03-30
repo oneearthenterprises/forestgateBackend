@@ -14,7 +14,8 @@ const createRoom = async (req, res) => {
             amenities,
             tag,
             maxAdults,
-            maxChildren
+            maxChildren,
+            extraBeddingPrice
         } = req.body;
 
         // Validate required fields
@@ -125,6 +126,7 @@ const createRoom = async (req, res) => {
             tag: tag || "Premium Stay",
             maxAdults: maxAdults || 2,
             maxChildren: maxChildren || 2,
+            extraBeddingPrice: extraBeddingPrice || 5000,
             images: imageUrls,
             videos: videoUrls
         });
@@ -246,6 +248,7 @@ const updateRoom = async (req, res) => {
         room.tag = req.body.tag ?? room.tag;
         room.maxAdults = req.body.maxAdults ?? room.maxAdults;
         room.maxChildren = req.body.maxChildren ?? room.maxChildren;
+        room.extraBeddingPrice = req.body.extraBeddingPrice ?? room.extraBeddingPrice;
 
         if (req.body.amenities) {
             room.amenities = Array.isArray(req.body.amenities)

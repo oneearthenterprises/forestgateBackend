@@ -10,6 +10,10 @@ const roomSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+  extraBeddingPrice: {
+    type: Number,
+    default: 5000
+  },
   maxAdults: {
     type: Number,
     default: 2
