@@ -3,7 +3,7 @@ import {
   newsletter,
   getNewsletter,
   sendNewsletter,
-  unsubscribe
+  unsubscribe,
 } from "../controllers/newsletterController.js";
 import upload from "../middlewares/upload.js";
 
@@ -12,25 +12,24 @@ const router = express.Router();
 router.post("/newsletteremail", newsletter);
 router.get("/getnewsletter", getNewsletter);
 router.get("/unsubscribe", unsubscribe);
-router.post("/send", 
-    (req, res, next) => {
-        upload.fields([
-            { name: "images", maxCount: 1 }
-        ])(req, res, (err) => {
-            if (err) {
-                if (err.code === 'LIMIT_FILE_SIZE') {
-                    return res.status(400).json({
-                        message: 'File too large. Maximum size is 50MB per file.'
-                    });
-                }
-                return res.status(400).json({
-                    message: err.message || 'File upload error'
-                });
-            }
-            next();
+router.post(
+  "/send",
+  (req, res, next) => {
+    upload.fields([{ name: "images", maxCount: 1 }])(req, res, (err) => {
+      if (err) {
+        if (err.code === "LIMIT_FILE_SIZE") {
+          return res.status(400).json({
+            message: "File too large. Maximum size is 50MB per file.",
+          });
+        }
+        return res.status(400).json({
+          message: err.message || "File upload error",
         });
-    },
-    sendNewsletter
+      }
+      next();
+    });
+  },
+  sendNewsletter,
 );
 
 export default router;
