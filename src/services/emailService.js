@@ -3,27 +3,29 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const isGmail = process.env.EMAIL_USER?.includes('gmail.com');
+const isGmail = process.env.EMAIL_USER?.includes("gmail.com");
 
 const transporter = nodemailer.createTransport(
-  isGmail ? {
-    service: "gmail",
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-  } : {
-    host: "mail.forestgatetrails.com",
-    port: 465,
-    secure: true,
-    auth: {
-      user: "admin@forestgatetrails.com",
-      pass: process.env.EMAIL_PASS,
-    },
-    tls: {
-      rejectUnauthorized: false // Helps with self-signed certificates on custom hosts
-    }
-  }
+  isGmail
+    ? {
+        service: "gmail",
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+        },
+      }
+    : {
+        host: "mail.forestgatetrails.com",
+        port: 465,
+        secure: true,
+        auth: {
+          user: "admin@forestgatetrails.com",
+          pass: process.env.EMAIL_PASS,
+        },
+        tls: {
+          rejectUnauthorized: false, // Helps with self-signed certificates on custom hosts
+        },
+      },
 );
 
 /**
@@ -31,7 +33,9 @@ const transporter = nodemailer.createTransport(
  */
 const getRoomListStr = (booking, fallbackRoomName = "Sanctuary Stay") => {
   if (booking.allocation && booking.allocation.length > 0) {
-    return booking.allocation.map(r => r.name || booking.bookingType || fallbackRoomName).join(", ");
+    return booking.allocation
+      .map((r) => r.name || booking.bookingType || fallbackRoomName)
+      .join(", ");
   }
   return booking.roomName || booking.bookingType || fallbackRoomName;
 };
@@ -43,12 +47,20 @@ const getDynamicTotal = (booking) => {
   if (!booking) return 0;
   const inDate = new Date(booking.checkIn);
   const outDate = new Date(booking.checkOut);
-  const nights = Math.max(1, Math.ceil((outDate - inDate) / (1000 * 60 * 60 * 24)));
-  
+  const nights = Math.max(
+    1,
+    Math.ceil((outDate - inDate) / (1000 * 60 * 60 * 24)),
+  );
+
   if (booking.allocation && booking.allocation.length > 0) {
-    const allocSum = booking.allocation.reduce((sum, r) => sum + (Number(r.price) || 0), 0);
-    const addonsSum = (booking.addons || []).filter(a => a.status !== "cancelled").reduce((s, a) => s + (Number(a.price) || 0), 0);
-    return (allocSum * nights) + addonsSum;
+    const allocSum = booking.allocation.reduce(
+      (sum, r) => sum + (Number(r.price) || 0),
+      0,
+    );
+    const addonsSum = (booking.addons || [])
+      .filter((a) => a.status !== "cancelled")
+      .reduce((s, a) => s + (Number(a.price) || 0), 0);
+    return allocSum * nights + addonsSum;
   }
   return Number(booking.totalAmount) || 0;
 };
@@ -279,10 +291,10 @@ Forest Gate
 
 export const verifyOtpRegisterOtp = async (email, otp) => {
   try {
-    console.log('\n' + '='.repeat(50));
+    console.log("\n" + "=".repeat(50));
     console.log(`[AUTH] REGISTRATION OTP FOR ${email}: ${otp}`);
-    console.log('='.repeat(50) + '\n');
-    
+    console.log("=".repeat(50) + "\n");
+
     await transporter.sendMail({
       from: `"ForestGate" <admin@forestgatetrails.com>`,
       to: email,
@@ -429,11 +441,11 @@ const getBookingConfirmationTemplate = (booking) => `
                     <div class="fallback-row">
                         <div class="fallback-col">
                             <span class="detail-label">Check-In</span>
-                            <span class="detail-value">${new Date(booking.checkIn).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                            <span class="detail-value">${new Date(booking.checkIn).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}</span>
                         </div>
                         <div class="fallback-col">
                             <span class="detail-label">Check-Out</span>
-                            <span class="detail-value">${new Date(booking.checkOut).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                            <span class="detail-value">${new Date(booking.checkOut).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}</span>
                         </div>
                     </div>
                     
@@ -496,7 +508,10 @@ export const sendBookingConfirmationEmail = async (booking) => {
     });
     console.log(`Booking confirmation email sent to ${booking.email}`);
   } catch (error) {
-    console.error(`Error sending confirmation email to ${booking.email}:`, error);
+    console.error(
+      `Error sending confirmation email to ${booking.email}:`,
+      error,
+    );
   }
 };
 
@@ -576,11 +591,11 @@ const getBookingReceivedTemplate = (booking) => `
                     <div class="fallback-row">
                         <div class="fallback-col">
                             <span class="detail-label">Check-In</span>
-                            <span class="detail-value">${new Date(booking.checkIn).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                            <span class="detail-value">${new Date(booking.checkIn).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}</span>
                         </div>
                         <div class="fallback-col">
                             <span class="detail-label">Check-Out</span>
-                            <span class="detail-value">${new Date(booking.checkOut).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                            <span class="detail-value">${new Date(booking.checkOut).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}</span>
                         </div>
                     </div>
                     
@@ -665,7 +680,7 @@ const getBookingCancelledTemplate = (booking) => `
             <div class="details">
                 <p><strong>Booking ID:</strong> ${booking.bookingId || booking._id}</p>
                 <p><strong>Dates:</strong> ${new Date(booking.checkIn).toLocaleDateString()} - ${new Date(booking.checkOut).toLocaleDateString()}</p>
-                <p><strong>Reason:</strong> ${booking.cancellationReasons?.join(', ') || 'User/Policy Cancelled'}</p>
+                <p><strong>Reason:</strong> ${booking.cancellationReasons?.join(", ") || "User/Policy Cancelled"}</p>
             </div>
 
             <p>If you have any questions or would like to re-book for another date, please visit our website or contact us.</p>
@@ -700,7 +715,10 @@ export const sendBookingCancelledEmail = async (booking) => {
       html: getBookingCancelledTemplate(booking),
     });
   } catch (error) {
-    console.error(`Error sending cancellation email to ${booking.email}:`, error);
+    console.error(
+      `Error sending cancellation email to ${booking.email}:`,
+      error,
+    );
   }
 };
 
@@ -749,8 +767,8 @@ const getPaymentConfirmationUserTemplate = (booking) => `
                 <div class="grid">
                     <div class="item"><span class="label">Booking ID:</span> ${booking.bookingId || booking._id}</div>
                     <div class="item"><span class="label">Status:</span> <span style="color: #2f855a; font-weight: bold;">Paid</span></div>
-                    <div class="item"><span class="label">Check-in:</span> ${new Date(booking.checkIn).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' })}</div>
-                    <div class="item"><span class="label">Check-out:</span> ${new Date(booking.checkOut).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' })}</div>
+                    <div class="item"><span class="label">Check-in:</span> ${new Date(booking.checkIn).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" })}</div>
+                    <div class="item"><span class="label">Check-out:</span> ${new Date(booking.checkOut).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" })}</div>
                 </div>
             </div>
 
@@ -758,12 +776,16 @@ const getPaymentConfirmationUserTemplate = (booking) => `
             <div class="info-text">
                 <p><strong>Lead Guest:</strong> ${booking.fullName}</p>
                 <p><strong>Total Guests:</strong> ${booking.guests?.adults || 0} Adults, ${booking.guests?.children || 0} Children</p>
-                ${booking.guestDetails && booking.guestDetails.length > 0 ? `
+                ${
+                  booking.guestDetails && booking.guestDetails.length > 0
+                    ? `
                     <p><strong>Members List:</strong></p>
                     <ul style="margin: 5px 0; padding-left: 20px;">
-                        ${booking.guestDetails.map(guest => `<li>${guest.name} (${guest.type}${guest.age ? `, Age: ${guest.age}` : ''})</li>`).join('')}
+                        ${booking.guestDetails.map((guest) => `<li>${guest.name} (${guest.type}${guest.age ? `, Age: ${guest.age}` : ""})</li>`).join("")}
                     </ul>
-                ` : ''}
+                `
+                    : ""
+                }
             </div>
 
             <div class="section-title">Financial Summary / Invoice</div>
@@ -777,18 +799,31 @@ const getPaymentConfirmationUserTemplate = (booking) => `
                 <tbody>
                     <tr>
                         <td>Stay: ${getRoomListStr(booking)} (${booking.totalNights} Nights)</td>
-                        <td style="text-align: right;">₹${(
-                            (booking.allocation && booking.allocation.length > 0)
-                            ? (booking.allocation.reduce((sum, r) => sum + (Number(r.price) || 0), 0) * (booking.totalNights || 1))
-                            : ((booking.pricePerNight || 0) * (booking.totalNights || 1))
+                        <td style="text-align: right;">₹${(booking.allocation &&
+                        booking.allocation.length > 0
+                          ? booking.allocation.reduce(
+                              (sum, r) => sum + (Number(r.price) || 0),
+                              0,
+                            ) * (booking.totalNights || 1)
+                          : (booking.pricePerNight || 0) *
+                            (booking.totalNights || 1)
                         ).toLocaleString()}</td>
                     </tr>
-                    ${booking.addons && booking.addons.length > 0 ? booking.addons.filter(a => a.status !== "cancelled").map(addon => `
+                    ${
+                      booking.addons && booking.addons.length > 0
+                        ? booking.addons
+                            .filter((a) => a.status !== "cancelled")
+                            .map(
+                              (addon) => `
                         <tr>
                             <td>Add-on: ${addon.name}</td>
                             <td style="text-align: right;">₹${(addon.price || 0).toLocaleString()}</td>
                         </tr>
-                    `).join('') : ''}
+                    `,
+                            )
+                            .join("")
+                        : ""
+                    }
                     <tr class="total-row">
                         <td>TOTAL PAID</td>
                         <td style="text-align: right;">₹${getDynamicTotal(booking).toLocaleString()}</td>
@@ -796,15 +831,23 @@ const getPaymentConfirmationUserTemplate = (booking) => `
                 </tbody>
             </table>
 
-            ${booking.specialRequest ? `
+            ${
+              booking.specialRequest
+                ? `
                 <div class="section-title">Special Requests</div>
                 <div class="info-text">${booking.specialRequest}</div>
-            ` : ''}
+            `
+                : ""
+            }
 
-            ${booking.notes ? `
+            ${
+              booking.notes
+                ? `
                 <div class="section-title">Stay Notes</div>
                 <div class="info-text">${booking.notes}</div>
-            ` : ''}
+            `
+                : ""
+            }
 
             <div style="text-align: center;">
                 <a href="https://forestgatetrails.com/my-bookings" class="cta-button">Manage My Booking</a>

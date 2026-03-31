@@ -106,6 +106,7 @@ const createBooking = async (req, res) => {
         // 🔥 SERVER decides amount (or uses manual price)
         let basePrice = totalNights * finalPricePerNight;
         if (allocation && allocation.length > 0) {
+            // allocation[].price is price-per-night per room (set by frontend)
             const allocationSum = allocation.reduce((sum, r) => sum + (Number(r.price) || 0), 0);
             basePrice = totalNights * allocationSum;
         }
@@ -115,7 +116,11 @@ const createBooking = async (req, res) => {
             if (addon.status === "cancelled") return sum;
             return sum + (Number(addon.price) || 0);
         }, 0);
-        const totalAmount = basePrice + addonsPrice;
+
+        // Apply same pricing as frontend: 10% discount + 18% GST on room base, then add addons
+        const discountedBase = basePrice * 0.90;       // 10% discount
+        const baseWithGst = discountedBase * 1.18;     // 18% GST
+        const totalAmount = Math.round(baseWithGst + addonsPrice);
 
         const booking = await Booking.create({
             bookingId: bookingIdValue,
