@@ -6,7 +6,7 @@ import contactRoutes from "./routes/contactRoutes.js";
 import bookingRoutes from "./routes/bookingRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
-import newsletterRoutes from "./routes/NewslatterRouts.js";
+import newsletterRoutes from "./routes/newsletterRoutes.js";
 import welcomePopupRoutes from "./routes/welcomePopupRoutes.js";
 import blogRoutes from "./routes/blogRoutes.js";
 const app = express();

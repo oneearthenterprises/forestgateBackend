@@ -4,7 +4,7 @@ import {
   getNewsletter,
   sendNewsletter,
   unsubscribe
-} from "../controllers/NewslatterController.js";
+} from "../controllers/newsletterController.js";
 import upload from "../middlewares/upload.js";
 
 const router = express.Router();

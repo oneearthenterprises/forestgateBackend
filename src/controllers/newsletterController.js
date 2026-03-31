@@ -1,4 +1,4 @@
-import Newslatter from "../models/Newslatter.js";
+import Newsletter from "../models/newsletter.js";
 import nodemailer from "nodemailer";
 import cloudinary from "../config/cloudinary.js";
 import fs from "fs";
@@ -11,14 +11,14 @@ export const newsletter = async (req, res) => {
         message: "Please provide email",
       });
     }
-    const user = await Newslatter.findOne({ email });
+    const user = await Newsletter.findOne({ email });
     if (user) {
       return res.status(409).json({
         message: "User already exists",
       });
     }
 
-    const newUser = await Newslatter.create({ email });
+    const newUser = await Newsletter.create({ email });
 
     // Send Welcome Email
     const transporter = nodemailer.createTransport({
@@ -111,8 +111,8 @@ export const getNewsletter = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    const total = await Newslatter.countDocuments();
-    const users = await Newslatter.find()
+    const total = await Newsletter.countDocuments();
+    const users = await Newsletter.find()
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
@@ -142,7 +142,7 @@ export const sendNewsletter = async (req, res) => {
       });
     }
 
-    const users = await Newslatter.find();
+    const users = await Newsletter.find();
 
     if (users.length === 0) {
       return res.status(404).json({
@@ -284,7 +284,7 @@ export const unsubscribe = async (req, res) => {
       return res.status(400).send("Email is required");
     }
 
-    const deletedUser = await Newslatter.findOneAndDelete({ email });
+    const deletedUser = await Newsletter.findOneAndDelete({ email });
 
     // Return a styled HTML page so the user sees proper confirmation when clicking the link
     res.status(200).send(`
