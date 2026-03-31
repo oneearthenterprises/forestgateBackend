@@ -208,3 +208,15 @@
   "body": "*Booking Request Received - The Forest Gate*\n\nDear Gaurav Kumar,\nThank you for choosing The Forest Gate! 🏕️\n\nYour booking request for *Honeymoon Special Room* has been received and is currently *pending confirmation* by our team.\n\n*Dates:* 3/31/2026 – 4/1/2026\n*Guests:* 2 Adults, 0 Children\n*Total:* ₹0\n\nYou will receive a confirmation message once our team approves your booking. We'll be in touch shortly! 🙏"
 }
 ---
+[2026-03-31T06:40:23.311Z] {
+  "method": "sendBookingNotification (Admin)",
+  "to": "whatsapp:+917973132988",
+  "body": "*New Booking Alert - Forest Gate*\n\n*Guest:* Gaurav Kumar\n*Rooms:* dubble rooms Room\n*Dates:* Tue Mar 31 2026 - Wed Apr 01 2026\n*Guests:* 2 Adults, 0 Children\n*Total:* ₹0\n*Phone:* 9304987505\n\nPlease log in to the admin dashboard to confirm."
+}
+---
+[2026-03-31T06:40:23.917Z] {
+  "method": "sendBookingPendingGuestWhatsApp (Guest)",
+  "to": "whatsapp:+919304987505",
+  "body": "*Booking Request Received - The Forest Gate*\n\nDear Gaurav Kumar,\nThank you for choosing The Forest Gate! 🏕️\n\nYour booking request for *dubble rooms Room* has been received and is currently *pending confirmation* by our team.\n\n*Dates:* 3/31/2026 – 4/1/2026\n*Guests:* 2 Adults, 0 Children\n*Total:* ₹0\n\nYou will receive a confirmation message once our team approves your booking. We'll be in touch shortly! 🙏"
+}
+---
