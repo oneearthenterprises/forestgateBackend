@@ -26,7 +26,7 @@ export const newsletter = async (req, res) => {
       port: 465,
       secure: true,
       auth: {
-        user: "admin@forestgatetrails.com",
+        user: "forestgatemorni@gmail.com",
         pass: process.env.EMAIL_PASS,
       },
     });
@@ -181,7 +181,7 @@ export const sendNewsletter = async (req, res) => {
       port: 465,
       secure: true,
       auth: {
-        user: "admin@forestgatetrails.com",
+        user: "forestgatemorni@gmail.com",
         pass: process.env.EMAIL_PASS,
       },
     });

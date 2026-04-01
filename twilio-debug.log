@@ -460,3 +460,21 @@
   "body": "*Booking Confirmed - Forest Gate Sanctuary*\n\nDear Gaurav Kumar,\nYour booking for *Premium Family Room, Premium Family Room* has been confirmed!\n\n*Dates:* 3/31/2026 - 4/1/2026\n*Total:* ₹21,000\n\n*Cancellation Policy:* Full refund only if cancelled 48 hours before check-in.\n\nWe look forward to seeing you!"
 }
 ---
+[2026-04-01T11:49:29.956Z] {
+  "method": "sendBookingNotification (Admin)",
+  "to": "whatsapp:+917973132988",
+  "body": "*New Booking Alert - Forest Gate*\n\n*Guest:* Gaurav Kumar\n*Rooms:* dubble rooms Room, dubble rooms Room\n*Dates:* Wed Apr 01 2026 - Thu Apr 02 2026\n*Guests:* 4 Adults, 0 Children\n*Total:* ₹7,000\n*Phone:* 9304987505\n\nPlease log in to the admin dashboard to confirm."
+}
+---
+[2026-04-01T11:49:31.418Z] {
+  "method": "sendBookingPendingGuestWhatsApp (Guest)",
+  "to": "whatsapp:+919304987505",
+  "body": "*Booking Request Received - The Forest Gate*\n\nDear Gaurav Kumar,\nThank you for choosing The Forest Gate! 🏕️\n\nYour booking request for *dubble rooms Room, dubble rooms Room* has been received and is currently *pending confirmation* by our team.\n\n*Dates:* 4/1/2026 – 4/2/2026\n*Guests:* 4 Adults, 0 Children\n*Total:* ₹7,000\n\nYou will receive a confirmation message once our team approves your booking. We'll be in touch shortly! 🙏"
+}
+---
+[2026-04-01T11:58:36.991Z] {
+  "method": "sendBookingConfirmationWhatsApp (Guest)",
+  "to": "whatsapp:+919304987505",
+  "body": "*Booking Confirmed - Forest Gate Sanctuary*\n\nDear Gaurav Kumar,\nYour booking for *dubble rooms Room, dubble rooms Room* has been confirmed!\n\n*Dates:* 4/1/2026 - 4/2/2026\n*Total:* ₹7,000\n\n*Cancellation Policy:* Full refund only if cancelled 48 hours before check-in.\n\nWe look forward to seeing you!"
+}
+---

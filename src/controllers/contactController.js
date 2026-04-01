@@ -77,7 +77,7 @@ const replyToContact = async (req, res) => {
       port: 465,
       secure: true,
       auth: {
-        user: "admin@forestgatetrails.com",
+        user: "forestgatemorni@gmail.com",
         pass: process.env.EMAIL_PASS,
       },
     });

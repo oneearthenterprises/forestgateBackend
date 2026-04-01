@@ -4,15 +4,10 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
-  secure: true,
+  service: "gmail",
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  tls: {
-    rejectUnauthorized: false,
+    user: process.env.EMAIL_USER, // forestgatemorni@gmail.com
+    pass: process.env.EMAIL_PASS, // Gmail App Password
   },
 });
 
@@ -89,7 +84,7 @@ const getBirthdayTemplate = (name, email) => `
         <div class="footer">
             <p style="font-style: italic; opacity: 0.9;">Celebrate with Forest Gate</p>
             <p class="unsubscribe">
-              <a href="${process.env.API_URL || "https://backendapi.forestgatetrails.com"}/api/newsletter/unsubscribe?email=${email}">Unsubscribe</a>
+              <a href="${process.env.API_URL || "http://localhost:5000"}/api/newsletter/unsubscribe?email=${email}">Unsubscribe</a>
             </p>
         </div>
     </div>
@@ -133,7 +128,7 @@ const getAnniversaryTemplate = (name, email) => `
         <div class="footer">
             <p style="font-style: italic; opacity: 0.9;">Celebrate with Forest Gate</p>
             <p class="unsubscribe">
-              <a href="${process.env.API_URL || "https://backendapi.forestgatetrails.com"}/api/newsletter/unsubscribe?email=${email}">Unsubscribe</a>
+              <a href="${process.env.API_URL || "http://localhost:5000"}/api/newsletter/unsubscribe?email=${email}">Unsubscribe</a>
             </p>
         </div>
     </div>
@@ -145,40 +140,41 @@ const getForgotOtpTemplate = (otp) => `
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <style>
-        body { font-family: 'Times New Roman', Times, serif; background-color: #f4f4f4; margin: 0; padding: 0; }
-        .container { max-width: 600px; background-color: #ffffff; margin: 20px auto; border-spacing: 0; }
-        .header { padding: 40px 20px 20px 20px; text-align: center; }
-        .header h1 { font-size: 48px; margin: 0; color: #111; }
-        .header p { font-family: Arial, sans-serif; font-size: 14px; font-weight: bold; letter-spacing: 2px; color: #333; margin: 10px 0 0 0; text-transform: uppercase; }
-        .banner { width: 100%; display: block; }
-        .content { padding: 40px 30px; text-align: center; }
-        .otp-box { background-color: #f9f9f9; border: 1px dashed #a8aca1; padding: 20px; margin: 20px 0; display: inline-block; }
-        .otp-code { font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #111; }
-        .content p { font-size: 16px; color: #555; line-height: 1.6; margin: 0 0 20px 0; }
-        .footer { background-color: #a8aca1; padding: 20px; text-align: center; color: #fff; font-size: 12px; }
-    </style>
+<meta charset="UTF-8">
+<style>
+body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f9f9f9; padding: 0; margin: 0; }
+.container { max-width: 600px; margin: 40px auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+.header { background-color: #111111; padding: 30px 20px; text-align: center; border-bottom: 3px solid #fcb101; }
+.header img { width: 140px; }
+.content { padding: 40px 30px; text-align: center; color: #333333; }
+.content h2 { font-family: 'Times New Roman', Times, serif; font-size: 28px; font-weight: normal; margin-top: 0; margin-bottom: 20px; color: #111111; letter-spacing: 1px; }
+.content p { font-size: 16px; line-height: 1.5; color: #555555; margin-bottom: 30px; }
+.otp-wrapper { background-color: #fafafa; border: 1px dashed #fcb101; padding: 25px; border-radius: 8px; margin-bottom: 30px; }
+.otp { font-size: 42px; font-weight: bold; letter-spacing: 12px; color: #111111; margin: 0; }
+.note { font-size: 13px; color: #888888; margin-top: 10px; }
+.footer { background-color: #f5f5f5; padding: 20px; text-align: center; color: #888888; font-size: 12px; border-top: 1px solid #eeeeee; }
+.footer p { margin: 5px 0; }
+</style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <img src="https://res.cloudinary.com/djglckvn7/image/upload/v1773398383/forest_agte_123345_1_1_kix8vd.svg" alt="Forest Gate Logo" style="width: 120px; margin-bottom: 20px;">
-            <h1>Reset Password</h1>
-            <p>Security at Forest Gate</p>
-        </div>
-        <img class="banner" src="https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=600&auto=format&fit=crop" alt="Security" />
-        <div class="content">
-            <p>You requested to reset your password. Use the following OTP to proceed. This code is valid for 10 minutes.</p>
-            <div class="otp-box">
-                <span class="otp-code">${otp}</span>
-            </div>
-            <p>If you did not request this, please ignore this email or contact support.</p>
-        </div>
-        <div class="footer">
-            <p>&copy; ${new Date().getFullYear()} Forest Gate Sanctuary. All rights reserved.</p>
-        </div>
+<div class="container">
+  <div class="header">
+      <img src="https://res.cloudinary.com/djglckvn7/image/upload/v1773398383/forest_agte_123345_1_1_kix8vd.svg" alt="Forest Gate Logo">
+  </div>
+  <div class="content">
+    <h2>Password Reset Request</h2>
+    <p>We received a request to reset your password. Please use the verification code below to proceed.</p>
+    <div class="otp-wrapper">
+      <div class="otp">${otp}</div>
+      <div class="note">This code expires in 10 minutes.</div>
     </div>
+    <p style="font-size: 14px; color: #888;">If you did not make this request, please ignore this email or contact our support team.</p>
+  </div>
+  <div class="footer">
+    <p><strong>The Forest Gate Retreat & Trails</strong></p>
+    <p>&copy; ${new Date().getFullYear()} Forest Gate Sanctuary. All rights reserved.</p>
+  </div>
+</div>
 </body>
 </html>
 `;
@@ -187,37 +183,36 @@ const getResetSuccessTemplate = () => `
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <style>
-        body { font-family: 'Times New Roman', Times, serif; background-color: #f4f4f4; margin: 0; padding: 0; }
-        .container { max-width: 600px; background-color: #ffffff; margin: 20px auto; border-spacing: 0; }
-        .header { padding: 40px 20px 20px 20px; text-align: center; }
-        .header h1 { font-size: 48px; margin: 0; color: #111; }
-        .header p { font-family: Arial, sans-serif; font-size: 14px; font-weight: bold; letter-spacing: 2px; color: #333; margin: 10px 0 0 0; text-transform: uppercase; }
-        .banner { width: 100%; display: block; }
-        .content { padding: 40px 30px; text-align: center; }
-        .content h2 { font-size: 24px; font-weight: bold; color: #111; margin: 0 0 20px 0; text-transform: uppercase; }
-        .content p { font-size: 16px; color: #555; line-height: 1.6; margin: 0 0 30px 0; }
-        .footer { background-color: #a8aca1; padding: 20px; text-align: center; color: #fff; font-size: 12px; }
-    </style>
+<meta charset="UTF-8">
+<style>
+body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f9f9f9; padding: 0; margin: 0; }
+.container { max-width: 600px; margin: 40px auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+.header { background-color: #111111; padding: 30px 20px; text-align: center; border-bottom: 3px solid #fcb101; }
+.header img { width: 140px; }
+.content { padding: 40px 30px; text-align: center; color: #333333; }
+.content h2 { font-family: 'Times New Roman', Times, serif; font-size: 28px; font-weight: normal; margin-top: 0; margin-bottom: 20px; color: #111111; letter-spacing: 1px; }
+.content p { font-size: 16px; line-height: 1.5; color: #555555; margin-bottom: 30px; }
+.success-icon { font-size: 64px; margin-bottom: 20px; }
+.footer { background-color: #f5f5f5; padding: 20px; text-align: center; color: #888888; font-size: 12px; border-top: 1px solid #eeeeee; }
+.footer p { margin: 5px 0; }
+</style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <img src="https://res.cloudinary.com/djglckvn7/image/upload/v1773398383/forest_agte_123345_1_1_kix8vd.svg" alt="Forest Gate Logo" style="width: 120px; margin-bottom: 20px;">
-            <h1>Success!</h1>
-            <p>Account Updated</p>
-        </div>
-        <img class="banner" src="https://images.unsplash.com/photo-1506784983877-45594efa4cbe?q=80&w=600&auto=format&fit=crop" alt="Success" />
-        <div class="content">
-            <h2>Password Reset Successfully</h2>
-            <p>Your password has been securely updated. You can now log in to your account with your new password.</p>
-            <p>Time: ${new Date().toLocaleString()}</p>
-        </div>
-        <div class="footer">
-            <p>&copy; ${new Date().getFullYear()} Forest Gate Sanctuary. All rights reserved.</p>
-        </div>
-    </div>
+<div class="container">
+  <div class="header">
+      <img src="https://res.cloudinary.com/djglckvn7/image/upload/v1773398383/forest_agte_123345_1_1_kix8vd.svg" alt="Forest Gate Logo">
+  </div>
+  <div class="content">
+    <div class="success-icon">✔️</div>
+    <h2>Password Updated</h2>
+    <p>Your password has been successfully reset. You can now use your new password to log in to your Forest Gate account.</p>
+    <p style="font-size: 14px; color: #888;">Time of change: ${new Date().toLocaleString()}</p>
+  </div>
+  <div class="footer">
+    <p><strong>The Forest Gate Retreat & Trails</strong></p>
+    <p>&copy; ${new Date().getFullYear()} Forest Gate Sanctuary. All rights reserved.</p>
+  </div>
+</div>
 </body>
 </html>
 `;
@@ -228,50 +223,38 @@ const getVerifyOtpTemplate = (otp) => `
 <head>
 <meta charset="UTF-8">
 <style>
-body {
-  font-family: Arial, sans-serif;
-  background:#f4f4f4;
-  padding:0;
-  margin:0;
-}
-.container{
-  max-width:600px;
-  margin:20px auto;
-  background:white;
-}
-.content{
-  padding:40px;
-  text-align:center;
-}
-.otp{
-  font-size:32px;
-  font-weight:bold;
-  letter-spacing:8px;
-  margin:20px 0;
-  color:#111;
-}
-.footer{
-  background:#a8aca1;
-  padding:20px;
-  color:white;
-  text-align:center;
-}
+body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f9f9f9; padding: 0; margin: 0; }
+.container { max-width: 600px; margin: 40px auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+.header { background-color: #111111; padding: 30px 20px; text-align: center; border-bottom: 3px solid #fcb101; }
+.header img { width: 140px; }
+.content { padding: 40px 30px; text-align: center; color: #333333; }
+.content h2 { font-family: 'Times New Roman', Times, serif; font-size: 28px; font-weight: normal; margin-top: 0; margin-bottom: 20px; color: #111111; letter-spacing: 1px; }
+.content p { font-size: 16px; line-height: 1.5; color: #555555; margin-bottom: 30px; }
+.otp-wrapper { background-color: #fafafa; border: 1px solid #eeeeee; padding: 25px; border-radius: 8px; margin-bottom: 30px; }
+.otp { font-size: 42px; font-weight: bold; letter-spacing: 12px; color: #111111; margin: 0; }
+.note { font-size: 13px; color: #888888; margin-top: 10px; }
+.footer { background-color: #f5f5f5; padding: 20px; text-align: center; color: #888888; font-size: 12px; border-top: 1px solid #eeeeee; }
+.footer p { margin: 5px 0; }
 </style>
 </head>
 <body>
 <div class="container">
-<div class="header">
-    <img src="https://res.cloudinary.com/djglckvn7/image/upload/v1773398383/forest_agte_123345_1_1_kix8vd.svg" alt="Forest Gate Logo" style="width: 120px; margin-bottom: 20px;">
-</div>
-<div class="content">
-<h2>Email Verification</h2>
-<p>Your OTP for account verification:</p>
-<div class="otp">${otp}</div>
-<p>This OTP is valid for 10 minutes.</p>
-</div>
-<div class="footer">
-Forest Gate
-</div>
+  <div class="header">
+      <img src="https://res.cloudinary.com/djglckvn7/image/upload/v1773398383/forest_agte_123345_1_1_kix8vd.svg" alt="Forest Gate Logo">
+  </div>
+  <div class="content">
+    <h2>Secure Your Journey</h2>
+    <p>Welcome to The Forest Gate. Please use the verification code below to complete your registration and unlock your Himalayan experience.</p>
+    <div class="otp-wrapper">
+      <div class="otp">${otp}</div>
+      <div class="note">This code expires in 10 minutes.</div>
+    </div>
+    <p style="font-size: 14px; color: #888;">If you didn't request this code, you can safely ignore this email.</p>
+  </div>
+  <div class="footer">
+    <p><strong>The Forest Gate Retreat & Trails</strong></p>
+    <p>&copy; ${new Date().getFullYear()} Forest Gate Sanctuary. All rights reserved.</p>
+  </div>
 </div>
 </body>
 </html>
@@ -284,7 +267,7 @@ export const verifyOtpRegisterOtp = async (email, otp) => {
     console.log("=".repeat(50) + "\n");
 
     await transporter.sendMail({
-      from: `"ForestGate" <admin@forestgatetrails.com>`,
+      from: `"ForestGate" <forestgatemorni@gmail.com>`,
       to: email,
       subject: "Verify OTP - Forest Gate",
       html: getVerifyOtpTemplate(otp),
@@ -297,7 +280,7 @@ export const verifyOtpRegisterOtp = async (email, otp) => {
 export const sendBirthdayEmail = async (email, name) => {
   try {
     await transporter.sendMail({
-      from: `"ForestGate" <admin@forestgatetrails.com>`,
+      from: `"ForestGate" <forestgatemorni@gmail.com>`,
       to: email,
       subject: `Happy Birthday, ${name}! 🎂`,
       html: getBirthdayTemplate(name, email),
@@ -311,7 +294,7 @@ export const sendBirthdayEmail = async (email, name) => {
 export const sendAnniversaryEmail = async (email, name) => {
   try {
     await transporter.sendMail({
-      from: `"ForestGate" <admin@forestgatetrails.com>`,
+      from: `"ForestGate" <forestgatemorni@gmail.com>`,
       to: email,
       subject: `Happy Anniversary, ${name}! 🥂`,
       html: getAnniversaryTemplate(name, email),
@@ -325,7 +308,7 @@ export const sendAnniversaryEmail = async (email, name) => {
 export const sendForgotOtpEmail = async (email, otp) => {
   try {
     await transporter.sendMail({
-      from: `"ForestGate" <admin@forestgatetrails.com>`,
+      from: `"ForestGate" <forestgatemorni@gmail.com>`,
       to: email,
       subject: `Reset Password OTP - Forest Gate`,
       html: getForgotOtpTemplate(otp),
@@ -339,7 +322,7 @@ export const sendForgotOtpEmail = async (email, otp) => {
 export const sendResetSuccessEmail = async (email) => {
   try {
     await transporter.sendMail({
-      from: `"ForestGate" <admin@forestgatetrails.com>`,
+      from: `"ForestGate" <forestgatemorni@gmail.com>`,
       to: email,
       subject: `Password Reset Successfully - Forest Gate`,
       html: getResetSuccessTemplate(),
@@ -489,7 +472,7 @@ const getBookingConfirmationTemplate = (booking) => `
 export const sendBookingConfirmationEmail = async (booking) => {
   try {
     await transporter.sendMail({
-      from: `"ForestGate" <admin@forestgatetrails.com>`,
+      from: `"ForestGate" <forestgatemorni@gmail.com>`,
       to: booking.email,
       subject: `Booking Confirmed - Forest Gate Sanctuary`,
       html: getBookingConfirmationTemplate(booking),
@@ -684,7 +667,7 @@ const getBookingCancelledTemplate = (booking) => `
 export const sendBookingReceivedEmail = async (booking) => {
   try {
     await transporter.sendMail({
-      from: `"ForestGate" <admin@forestgatetrails.com>`,
+      from: `"ForestGate" <forestgatemorni@gmail.com>`,
       to: booking.email,
       subject: `Booking Request Received - Forest Gate Sanctuary`,
       html: getBookingReceivedTemplate(booking),
@@ -697,7 +680,7 @@ export const sendBookingReceivedEmail = async (booking) => {
 export const sendBookingCancelledEmail = async (booking) => {
   try {
     await transporter.sendMail({
-      from: `"ForestGate" <admin@forestgatetrails.com>`,
+      from: `"ForestGate" <forestgatemorni@gmail.com>`,
       to: booking.email,
       subject: `Booking Cancelled - Forest Gate Sanctuary`,
       html: getBookingCancelledTemplate(booking),
@@ -896,7 +879,7 @@ const getPaymentConfirmationAdminTemplate = (booking) => `
 export const sendPaymentConfirmationToUser = async (booking) => {
   try {
     await transporter.sendMail({
-      from: `"ForestGate" <admin@forestgatetrails.com>`,
+      from: `"ForestGate" <forestgatemorni@gmail.com>`,
       to: booking.email,
       subject: `Payment Confirmed - Forest Gate Sanctuary`,
       html: getPaymentConfirmationUserTemplate(booking),
@@ -910,8 +893,8 @@ export const sendPaymentConfirmationToUser = async (booking) => {
 export const sendPaymentConfirmationToAdmin = async (booking) => {
   try {
     await transporter.sendMail({
-      from: `"ForestGate" <admin@forestgatetrails.com>`,
-      to: "admin@forestgatetrails.com",
+      from: `"ForestGate" <forestgatemorni@gmail.com>`,
+      to: "forestgatemorni@gmail.com",
       subject: `ALERT: Payment Received from ${booking.fullName}`,
       html: getPaymentConfirmationAdminTemplate(booking),
     });

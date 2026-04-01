@@ -11,7 +11,6 @@ import {
     sendPaymentConfirmationToUser,
     sendPaymentConfirmationToAdmin
 } from "../services/emailService.js";
-import { verifyRecaptcha } from "../utils/recaptcha.js";
 
 /* =========================
    CREATE BOOKING
@@ -51,17 +50,6 @@ const createBooking = async (req, res) => {
             return res
                 .status(400)
                 .json({ message: "Please fill all required fields" });
-        }
-
-        // 🔹 Verify reCAPTCHA token if provided or if in production
-        const shouldVerify = recaptchaToken || process.env.NODE_ENV === 'production';
-        if (shouldVerify) {
-            const isValid = await verifyRecaptcha(recaptchaToken);
-            if (!isValid) {
-                return res.status(403).json({
-                    message: "reCAPTCHA verification failed. Please try again.",
-                });
-            }
         }
 
         // 🔹 Handle Manual Room Selection (Admin)

@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import Usermodel from "../models/user.js";
 import cloudinary from "../config/cloudinary.js";
-import nodemailer from "nodemailer";
+
 import Booking from "../models/booking.js";
 import {
   sendForgotOtpEmail,
@@ -10,14 +10,13 @@ import {
   verifyOtpRegisterOtp,
 } from "../services/emailService.js";
 import dotenv from "dotenv";
-import { verifyRecaptcha } from "../utils/recaptcha.js";
 dotenv.config();
 
 // admin routes
 
 const adminLogin = async (req, res) => {
   try {
-    const { email, password, recaptchaToken } = req.body;
+    const { email, password } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({
@@ -25,18 +24,8 @@ const adminLogin = async (req, res) => {
       });
     }
 
-    // Verify reCAPTCHA token
-    if (recaptchaToken || process.env.NODE_ENV === 'production') {
-      const isValid = await verifyRecaptcha(recaptchaToken);
-      if (!isValid) {
-        return res.status(403).json({
-          message: "reCAPTCHA verification failed. Please try again.",
-        });
-      }
-    }
-
     // Static admin credentials check
-    const isAdminEmail = email === "adminforestgate@gmail.com";
+    const isAdminEmail = email === "forestgatemorni@gmail.com";
     const isAdminPassword = password === "adminforestgate";
 
     if (!isAdminEmail || !isAdminPassword) {
@@ -170,7 +159,7 @@ const registerUser = async (req, res) => {
 
 const loginUser = async (req, res) => {
   try {
-    const { email, password, recaptchaToken } = req.body;
+    const { email, password } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({
@@ -178,15 +167,6 @@ const loginUser = async (req, res) => {
       });
     }
 
-    // Verify reCAPTCHA token
-    if (recaptchaToken || process.env.NODE_ENV === 'production') {
-      const isValid = await verifyRecaptcha(recaptchaToken);
-      if (!isValid) {
-        return res.status(403).json({
-          message: "reCAPTCHA verification failed. Please try again.",
-        });
-      }
-    }
     // not alrady user
 
     const user = await Usermodel.findOne({ email });
@@ -354,27 +334,7 @@ const resendForgotOtp = async (req, res) => {
     user.otpLastSentAt = Date.now();
     await user.save();
 
-    const transporter = nodemailer.createTransport({
-      host: "mail.forestgatetrails.com",
-      port: 465,
-      secure: true,
-      auth: {
-        user: "admin@forestgatetrails.com",
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
-    await transporter.sendMail({
-      from: `"ForestGate" <${process.env.EMAIL_USER}>`,
-      to: email,
-      subject: "Resend OTP - Reset Password",
-      html: `
-        <h2>Reset Password</h2>
-        <p>Your new OTP:</p>
-        <h1>${otp}</h1>
-        <p>Valid for 10 minutes.</p>
-      `,
-    });
+    await sendForgotOtpEmail(email, otp);
 
     res.status(200).json({
       message: "OTP resent successfully",
@@ -497,20 +457,28 @@ const getAllUsers = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const total = await Usermodel.countDocuments();
-    const users = await Usermodel.find({}, { password: 0 }).sort({
-      createdAt: -1,
-    })
-    .skip(skip)
-    .limit(limit)
-    .lean();
+    const users = await Usermodel.find({}, { password: 0 })
+      .sort({
+        createdAt: -1,
+      })
+      .skip(skip)
+      .limit(limit)
+      .lean();
 
     // Fetch booking counts and arrays for each user
-    const usersWithBookingData = await Promise.all(users.map(async (user) => {
-        const userBookings = await Booking.find({ email: user.email }, { bookingId: 1, _id: 1 }).lean();
+    const usersWithBookingData = await Promise.all(
+      users.map(async (user) => {
+        const userBookings = await Booking.find(
+          { email: user.email },
+          { bookingId: 1, _id: 1 },
+        ).lean();
         const count = userBookings.length;
-        const bookingIds = userBookings.map(b => b.bookingId || b._id.toString());
+        const bookingIds = userBookings.map(
+          (b) => b.bookingId || b._id.toString(),
+        );
         return { ...user, bookingCount: count, bookingIds };
-    }));
+      }),
+    );
 
     return res.status(200).json({
       message: "Users fetched successfully",
