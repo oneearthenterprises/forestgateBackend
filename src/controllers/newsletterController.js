@@ -78,7 +78,7 @@ export const newsletter = async (req, res) => {
             </div>
             <p class="unsubscribe">
               You're receiving this because you subscribed to our newsletters. <br>
-              <a href="${process.env.API_URL || "http://localhost:5000"}/api/newsletter/unsubscribe?email=${email}">Unsubscribe instantly</a>
+              <a href="${process.env.API_URL || "https://backendapi.forestgatetrails.com"}/api/newsletter/unsubscribe?email=${email}">Unsubscribe instantly</a>
             </p>
           </div>
         </div>
@@ -234,7 +234,7 @@ export const sendNewsletter = async (req, res) => {
             </div>
             <p class="unsubscribe">
               Stay connected with nature. <br>
-              <a href="${process.env.API_URL || "http://localhost:5000"}/api/newsletter/unsubscribe?email=${user.email}">Unsubscribe instantly</a>
+              <a href="${process.env.API_URL || "https://backendapi.forestgatetrails.com"}/api/newsletter/unsubscribe?email=${user.email}">Unsubscribe instantly</a>
             </p>
           </div>
         </div>

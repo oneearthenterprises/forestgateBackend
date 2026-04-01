@@ -3,30 +3,18 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const isGmail = process.env.EMAIL_USER?.includes("gmail.com");
-
-const transporter = nodemailer.createTransport(
-  isGmail
-    ? {
-        service: "gmail",
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS,
-        },
-      }
-    : {
-        host: "mail.forestgatetrails.com",
-        port: 465,
-        secure: true,
-        auth: {
-          user: "admin@forestgatetrails.com",
-          pass: process.env.EMAIL_PASS,
-        },
-        tls: {
-          rejectUnauthorized: false, // Helps with self-signed certificates on custom hosts
-        },
-      },
-);
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT),
+  secure: true,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+  tls: {
+    rejectUnauthorized: false,
+  },
+});
 
 /**
  * Helper to get formatted room list
@@ -101,7 +89,7 @@ const getBirthdayTemplate = (name, email) => `
         <div class="footer">
             <p style="font-style: italic; opacity: 0.9;">Celebrate with Forest Gate</p>
             <p class="unsubscribe">
-              <a href="${process.env.API_URL || "http://localhost:5000"}/api/newsletter/unsubscribe?email=${email}">Unsubscribe</a>
+              <a href="${process.env.API_URL || "https://backendapi.forestgatetrails.com"}/api/newsletter/unsubscribe?email=${email}">Unsubscribe</a>
             </p>
         </div>
     </div>
@@ -145,7 +133,7 @@ const getAnniversaryTemplate = (name, email) => `
         <div class="footer">
             <p style="font-style: italic; opacity: 0.9;">Celebrate with Forest Gate</p>
             <p class="unsubscribe">
-              <a href="${process.env.API_URL || "http://localhost:5000"}/api/newsletter/unsubscribe?email=${email}">Unsubscribe</a>
+              <a href="${process.env.API_URL || "https://backendapi.forestgatetrails.com"}/api/newsletter/unsubscribe?email=${email}">Unsubscribe</a>
             </p>
         </div>
     </div>
