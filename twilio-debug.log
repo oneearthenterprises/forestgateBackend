@@ -478,3 +478,39 @@
   "body": "*Booking Confirmed - Forest Gate Sanctuary*\n\nDear Gaurav Kumar,\nYour booking for *dubble rooms Room, dubble rooms Room* has been confirmed!\n\n*Dates:* 4/1/2026 - 4/2/2026\n*Total:* ₹7,000\n\n*Cancellation Policy:* Full refund only if cancelled 48 hours before check-in.\n\nWe look forward to seeing you!"
 }
 ---
+[2026-04-01T13:04:41.569Z] {
+  "method": "sendBookingNotification (Admin)",
+  "to": "whatsapp:+917973132988",
+  "body": "*New Booking Alert - Forest Gate*\n\n*Guest:* Gaurav Kumar\n*Rooms:* Honeymoon Special Room, Honeymoon Special Room\n*Dates:* Fri Apr 03 2026 - Sat Apr 04 2026\n*Guests:* 4 Adults, 3 Children\n*Total:* ₹34,000\n*Phone:* +919304987505\n\nPlease log in to the admin dashboard to confirm."
+}
+---
+[2026-04-01T13:04:43.349Z] {
+  "method": "sendBookingPendingGuestWhatsApp (Guest)",
+  "to": "whatsapp:+919304987505",
+  "body": "*Booking Request Received - The Forest Gate*\n\nDear Gaurav Kumar,\nThank you for choosing The Forest Gate! 🏕️\n\nYour booking request for *Honeymoon Special Room, Honeymoon Special Room* has been received and is currently *pending confirmation* by our team.\n\n*Dates:* 4/3/2026 – 4/4/2026\n*Guests:* 4 Adults, 3 Children\n*Total:* ₹34,000\n\nYou will receive a confirmation message once our team approves your booking. We'll be in touch shortly! 🙏"
+}
+---
+[2026-04-01T13:16:30.502Z] {
+  "method": "sendBookingNotification (Admin)",
+  "to": "whatsapp:+917973132988",
+  "body": "*New Booking Alert - Forest Gate*\n\n*Guest:* Gaurav Kumar\n*Rooms:* Premium Family Room, Honeymoon Special Room\n*Dates:* Tue Apr 07 2026 - Thu Apr 09 2026\n*Guests:* 5 Adults, 0 Children\n\n*Pricing Breakdown:*\n• Base Room Price: ₹54,000\n• 10% Discount: -₹5,400\n• 18% GST: +₹8,748\n*Final Amount:* ₹57,348\n\n*Phone:* +919304987505\n\nPlease log in to the admin dashboard to confirm."
+}
+---
+[2026-04-01T13:16:31.982Z] {
+  "method": "sendBookingPendingGuestWhatsApp (Guest)",
+  "to": "whatsapp:+919304987505",
+  "body": "*Booking Request Received - The Forest Gate*\n\nDear Gaurav Kumar,\nThank you for choosing The Forest Gate! 🏕️\n\nYour booking request for *Premium Family Room, Honeymoon Special Room* has been received and is currently *pending confirmation* by our team.\n\n*Dates:* 4/7/2026 – 4/9/2026\n*Guests:* 5 Adults, 0 Children\n\n*Pricing Breakdown:*\n• Base Room Price: ₹54,000\n• 10% Discount: -₹5,400\n• 18% GST: +₹8,748\n*Final Amount:* ₹57,348\n\nYou will receive a confirmation message once our team approves your booking. We'll be in touch shortly! 🙏"
+}
+---
+[2026-04-02T08:26:36.152Z] {
+  "method": "sendBookingNotification (Admin)",
+  "to": "whatsapp:+917973132988",
+  "body": "*New Booking Alert - Forest Gate*\n\n*Guest:* Gaurav Kumar\n*Rooms:* Premium Comfort Room\n*Dates:* Fri Apr 17 2026 - Sat Apr 18 2026\n*Guests:* 2 Adults, 0 Children\n\n*Pricing Breakdown:*\n• Base Room Price: ₹1,000\n• 10% Discount: -₹100\n• 18% GST: +₹162\n*Final Amount:* ₹1,062\n\n*Phone:* 9304987505\n\nPlease log in to the admin dashboard to confirm."
+}
+---
+[2026-04-02T08:26:37.973Z] {
+  "method": "sendBookingPendingGuestWhatsApp (Guest)",
+  "to": "whatsapp:+919304987505",
+  "body": "*Booking Request Received - The Forest Gate*\n\nDear Gaurav Kumar,\nThank you for choosing The Forest Gate! 🏕️\n\nYour booking request for *Premium Comfort Room* has been received and is currently *pending confirmation* by our team.\n\n*Dates:* 4/17/2026 – 4/18/2026\n*Guests:* 2 Adults, 0 Children\n\n*Pricing Breakdown:*\n• Base Room Price: ₹1,000\n• 10% Discount: -₹100\n• 18% GST: +₹162\n*Final Amount:* ₹1,062\n\nYou will receive a confirmation message once our team approves your booking. We'll be in touch shortly! 🙏"
+}
+---

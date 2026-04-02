@@ -28,6 +28,13 @@ const getRoomListStr = (booking, fallbackRoomName = "Sanctuary Stay") => {
  */
 const getDynamicTotal = (booking) => {
   if (!booking) return 0;
+
+  // Always use the database's totalAmount if it exists (it includes tax and discounts)
+  if (booking.totalAmount) {
+    return Number(booking.totalAmount);
+  }
+
+  // Fallback logic
   const inDate = new Date(booking.checkIn);
   const outDate = new Date(booking.checkOut);
   const nights = Math.max(
@@ -43,9 +50,68 @@ const getDynamicTotal = (booking) => {
     const addonsSum = (booking.addons || [])
       .filter((a) => a.status !== "cancelled")
       .reduce((s, a) => s + (Number(a.price) || 0), 0);
-    return allocSum * nights + addonsSum;
+
+    const baseTotal = allocSum * nights + addonsSum;
+    const discount = baseTotal * 0.10;
+    const taxes = (baseTotal - discount) * 0.18;
+    return Math.round(baseTotal - discount + taxes);
   }
-  return Number(booking.totalAmount) || 0;
+  return 0;
+};
+
+const getPricingBreakdownHtml = (booking) => {
+  const inDate = new Date(booking.checkIn);
+  const outDate = new Date(booking.checkOut);
+  const nights = Math.max(1, Math.ceil((outDate - inDate) / (1000 * 60 * 60 * 24)));
+
+  let baseRoomTotal = 0;
+  let addonsSum = 0;
+
+  if (booking.allocation && booking.allocation.length > 0) {
+    baseRoomTotal = booking.allocation.reduce((sum, r) => sum + (Number(r.price) || 0), 0) * nights;
+    addonsSum = (booking.addons || []).filter(a => a.status !== "cancelled").reduce((s, a) => s + (Number(a.price) || 0), 0);
+  } else if (booking.basePrice) {
+    baseRoomTotal = Number(booking.basePrice) * nights;
+  }
+
+  const subtotal = baseRoomTotal + addonsSum;
+
+  if (subtotal === 0) return ''; // fallback if empty
+
+  const discount = Math.round(subtotal * 0.10);
+  const taxes = Math.round((subtotal - discount) * 0.18);
+
+  let html = `
+    <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+      <h4 style="margin: 0 0 15px 0; color: #111827; text-transform: uppercase; font-size: 12px; letter-spacing:1px;">Pricing Breakdown</h4>
+      <div style="display:table; width:100%; margin-bottom: 8px; font-size: 14px;">
+        <div style="display:table-cell; color:#4b5563;">Base Room Price (${nights} Nights)</div>
+        <div style="display:table-cell; text-align:right; font-weight:bold; color:#111827;">₹${baseRoomTotal.toLocaleString()}</div>
+      </div>
+  `;
+
+  if (addonsSum > 0) {
+    html += `
+      <div style="display:table; width:100%; margin-bottom: 8px; font-size: 14px;">
+        <div style="display:table-cell; color:#4b5563;">Extra Bedding / Services</div>
+        <div style="display:table-cell; text-align:right; font-weight:bold; color:#111827;">₹${addonsSum.toLocaleString()}</div>
+      </div>
+    `;
+  }
+
+  html += `
+      <div style="display:table; width:100%; margin-bottom: 8px; font-size: 14px; color: #059669;">
+        <div style="display:table-cell;">10% Discount</div>
+        <div style="display:table-cell; text-align:right; font-weight:bold;">-₹${discount.toLocaleString()}</div>
+      </div>
+      <div style="display:table; width:100%; margin-bottom: 15px; font-size: 14px;">
+        <div style="display:table-cell; color:#4b5563;">18% GST</div>
+        <div style="display:table-cell; text-align:right; font-weight:bold; color:#111827;">+₹${taxes.toLocaleString()}</div>
+      </div>
+    </div>
+  `;
+
+  return html;
 };
 
 const getBirthdayTemplate = (name, email) => `
@@ -436,9 +502,12 @@ const getBookingConfirmationTemplate = (booking) => `
                         </div>
                     </div>
                     
-                    <div class="price-row">
+                    <div class="price-row" style="padding-bottom: 10px; border-radius: 6px 6px 0 0;">
                         <span class="price-label">Total Amount Paid</span>
                         <span class="price-value">₹${getDynamicTotal(booking).toLocaleString()}</span>
+                    </div>
+                    <div style="background-color: #f3f4f6; padding: 0 20px 20px 20px; border-radius: 0 0 6px 6px;">
+                        ${getPricingBreakdownHtml(booking)}
                     </div>
                 </div>
 
@@ -543,7 +612,7 @@ const getBookingReceivedTemplate = (booking) => `
             <div class="header">
                 <img src="https://res.cloudinary.com/djglckvn7/image/upload/v1773398383/forest_agte_123345_1_1_kix8vd.svg" alt="Forest Gate Logo" style="width: 140px; margin-bottom: 20px; filter: brightness(0) invert(1);">
                 <h1>Request Received</h1>
-                <p>Forest Gate Sanctuary</p>
+                <p>FOREST GATE RETREAT and TRAILS</p>
             </div>
             
             <div class="content">
@@ -587,10 +656,14 @@ const getBookingReceivedTemplate = (booking) => `
                     </div>
                 </div>
                 
-                <div class="price-section">
+                <div class="price-section" style="padding-bottom: 10px; border-radius: 8px 8px 0 0; margin-bottom: 0;">
                     <p>Estimated Total Rate</p>
                     <h2>₹${getDynamicTotal(booking).toLocaleString()}</h2>
                     <p style="font-size: 11px; margin-top: 5px; opacity: 0.8; text-transform: none;">* Includes all taxes and applicable fees</p>
+                </div>
+                <!-- Breakdown -->
+                <div style="background-color: #f8faf9; border: 1px solid #e2e8e5; border-top: none; padding: 20px; border-radius: 0 0 8px 8px; margin-bottom: 25px;">
+                  ${getPricingBreakdownHtml(booking)}
                 </div>
 
                 <div class="next-steps">
@@ -747,16 +820,15 @@ const getPaymentConfirmationUserTemplate = (booking) => `
             <div class="info-text">
                 <p><strong>Lead Guest:</strong> ${booking.fullName}</p>
                 <p><strong>Total Guests:</strong> ${booking.guests?.adults || 0} Adults, ${booking.guests?.children || 0} Children</p>
-                ${
-                  booking.guestDetails && booking.guestDetails.length > 0
-                    ? `
+                ${booking.guestDetails && booking.guestDetails.length > 0
+    ? `
                     <p><strong>Members List:</strong></p>
                     <ul style="margin: 5px 0; padding-left: 20px;">
                         ${booking.guestDetails.map((guest) => `<li>${guest.name} (${guest.type}${guest.age ? `, Age: ${guest.age}` : ""})</li>`).join("")}
                     </ul>
                 `
-                    : ""
-                }
+    : ""
+  }
             </div>
 
             <div class="section-title">Financial Summary / Invoice</div>
@@ -771,30 +843,29 @@ const getPaymentConfirmationUserTemplate = (booking) => `
                     <tr>
                         <td>Stay: ${getRoomListStr(booking)} (${booking.totalNights} Nights)</td>
                         <td style="text-align: right;">₹${(booking.allocation &&
-                        booking.allocation.length > 0
-                          ? booking.allocation.reduce(
-                              (sum, r) => sum + (Number(r.price) || 0),
-                              0,
-                            ) * (booking.totalNights || 1)
-                          : (booking.pricePerNight || 0) *
-                            (booking.totalNights || 1)
-                        ).toLocaleString()}</td>
+    booking.allocation.length > 0
+    ? booking.allocation.reduce(
+      (sum, r) => sum + (Number(r.price) || 0),
+      0,
+    ) * (booking.totalNights || 1)
+    : (booking.pricePerNight || 0) *
+    (booking.totalNights || 1)
+  ).toLocaleString()}</td>
                     </tr>
-                    ${
-                      booking.addons && booking.addons.length > 0
-                        ? booking.addons
-                            .filter((a) => a.status !== "cancelled")
-                            .map(
-                              (addon) => `
+                    ${booking.addons && booking.addons.length > 0
+    ? booking.addons
+      .filter((a) => a.status !== "cancelled")
+      .map(
+        (addon) => `
                         <tr>
                             <td>Add-on: ${addon.name}</td>
                             <td style="text-align: right;">₹${(addon.price || 0).toLocaleString()}</td>
                         </tr>
                     `,
-                            )
-                            .join("")
-                        : ""
-                    }
+      )
+      .join("")
+    : ""
+  }
                     <tr class="total-row">
                         <td>TOTAL PAID</td>
                         <td style="text-align: right;">₹${getDynamicTotal(booking).toLocaleString()}</td>
@@ -802,23 +873,21 @@ const getPaymentConfirmationUserTemplate = (booking) => `
                 </tbody>
             </table>
 
-            ${
-              booking.specialRequest
-                ? `
+            ${booking.specialRequest
+    ? `
                 <div class="section-title">Special Requests</div>
                 <div class="info-text">${booking.specialRequest}</div>
             `
-                : ""
-            }
+    : ""
+  }
 
-            ${
-              booking.notes
-                ? `
+            ${booking.notes
+    ? `
                 <div class="section-title">Stay Notes</div>
                 <div class="info-text">${booking.notes}</div>
             `
-                : ""
-            }
+    : ""
+  }
 
             <div style="text-align: center;">
                 <a href="https://forestgatetrails.com/my-bookings" class="cta-button">Manage My Booking</a>

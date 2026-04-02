@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import Usermodel from "../models/user.js";
+import PendingUser from "../models/pendingUser.js";
 import cloudinary from "../config/cloudinary.js";
 
 import Booking from "../models/booking.js";
@@ -63,34 +64,57 @@ export const verifyOtpRegister = async (req, res) => {
       });
     }
 
-    const user = await Usermodel.findOne({ email });
+    // Look up in the pending (pre-verification) collection
+    const pending = await PendingUser.findOne({ email });
 
-    if (!user) {
+    if (!pending) {
       return res.status(404).json({
-        message: "User not found",
+        message: "No pending registration found. Please sign up again.",
       });
     }
 
-    if (user.otp !== otp) {
+    if (pending.otp !== otp) {
       return res.status(400).json({
         message: "Invalid OTP",
       });
     }
 
-    if (user.otpExpire < new Date()) {
+    if (pending.otpExpire < new Date()) {
+      await PendingUser.deleteOne({ email });
       return res.status(400).json({
-        message: "OTP expired",
+        message: "OTP expired. Please sign up again.",
       });
     }
 
-    user.isOtpVerified = true;
-    user.otp = "";
-    user.otpExpire = null;
+    // Check again that a real user hasn't been created in the meantime
+    const existingUser = await Usermodel.findOne({ email });
+    if (existingUser) {
+      await PendingUser.deleteOne({ email });
+      return res.status(409).json({ message: "Account already exists. Please log in." });
+    }
 
-    await user.save();
+    // Generate unique userId
+    const timestampPart = Date.now().toString().slice(-4);
+    const randomPart = Math.floor(1000 + Math.random() * 9000).toString();
+    const userId = `FG-USER-${timestampPart}${randomPart}`;
+
+    // Create the real user NOW that OTP is verified
+    const newUser = await Usermodel.create({
+      name: pending.name,
+      email: pending.email,
+      password: pending.password,
+      phone: pending.phone,
+      rememberMe: pending.rememberMe,
+      isOtpVerified: true,
+      userId,
+    });
+
+    // Clean up the pending record
+    await PendingUser.deleteOne({ email });
 
     res.status(200).json({
-      message: "OTP verified successfully",
+      message: "OTP verified successfully. Account created!",
+      user: { id: newUser._id, email: newUser.email },
     });
   } catch (error) {
     res.status(500).json({
@@ -109,46 +133,39 @@ const registerUser = async (req, res) => {
       });
     }
 
+    // Block if a verified account already exists
     const existingUser = await Usermodel.findOne({ email });
-
     if (existingUser) {
-      if (!existingUser.isOtpVerified) {
-        return res.status(409).json({
-          message: "OTP verification pending. Please verify your email.",
-        });
-      }
-
       return res.status(409).json({
-        message: "You already exist",
+        message: "An account with this email already exists. Please log in.",
       });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const timestampPart = Date.now().toString().slice(-4);
-    const randomPart = Math.floor(1000 + Math.random() * 9000).toString();
-    const userId = `FG-USER-${timestampPart}${randomPart}`;
 
-    const user = await Usermodel.create({
-      name,
-      email,
-      password: hashedPassword,
-      phone,
-      rememberMe,
-      otp,
-      otpExpire: Date.now() + 10 * 60 * 1000,
-      isOtpVerified: false,
-      userId,
-    });
+    // Upsert a pending record (so resend works cleanly)
+    await PendingUser.findOneAndUpdate(
+      { email },
+      {
+        name,
+        email,
+        password: hashedPassword,
+        phone,
+        rememberMe: rememberMe || false,
+        otp,
+        otpExpire: new Date(Date.now() + 10 * 60 * 1000),
+        otpLastSentAt: new Date(),
+        createdAt: new Date(), // reset TTL
+      },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
 
     await verifyOtpRegisterOtp(email, otp);
 
     return res.status(201).json({
-      message: "User registered successfully. OTP sent.",
-      user: {
-        id: user._id,
-        email: user.email,
-      },
+      message: "OTP sent to your email. Please verify to complete registration.",
+      email,
     });
   } catch (error) {
     res.status(500).json({
@@ -352,18 +369,14 @@ const resendRegistrationOtp = async (req, res) => {
       return res.status(400).json({ message: "Email is required" });
     }
 
-    const user = await Usermodel.findOne({ email });
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    if (user.isOtpVerified) {
-      return res.status(400).json({ message: "Email already verified" });
+    // Look in pending registrations
+    const pending = await PendingUser.findOne({ email });
+    if (!pending) {
+      return res.status(404).json({ message: "No pending registration found. Please sign up again." });
     }
 
     // ⏳ Rate limit: 1 OTP per 60 sec
-    if (user.otpLastSentAt && Date.now() - user.otpLastSentAt < 60 * 1000) {
+    if (pending.otpLastSentAt && Date.now() - new Date(pending.otpLastSentAt).getTime() < 60 * 1000) {
       return res.status(429).json({
         message: "Please wait before requesting another OTP",
       });
@@ -371,10 +384,11 @@ const resendRegistrationOtp = async (req, res) => {
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    user.otp = otp; // Plain string for registration
-    user.otpExpire = Date.now() + 10 * 60 * 1000;
-    user.otpLastSentAt = Date.now();
-    await user.save();
+    pending.otp = otp;
+    pending.otpExpire = new Date(Date.now() + 10 * 60 * 1000);
+    pending.otpLastSentAt = new Date();
+    pending.createdAt = new Date(); // reset TTL
+    await pending.save();
 
     await verifyOtpRegisterOtp(email, otp);
 

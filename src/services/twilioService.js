@@ -70,20 +70,44 @@ const getRoomListStr = (booking, fallbackRoomName = "Sanctuary Stay") => {
 };
 
 /**
- * Helper to dynamically calculate total based on allocation
+ * Helper to get pricing breakdown string for WhatsApp
  */
-const getDynamicTotal = (booking) => {
-  if (!booking) return 0;
+const getPricingBreakdownStr = (booking) => {
   const inDate = new Date(booking.checkIn);
   const outDate = new Date(booking.checkOut);
   const nights = Math.max(1, Math.ceil((outDate - inDate) / (1000 * 60 * 60 * 24)));
   
+  let baseRoomTotal = 0;
+  let addonsSum = 0;
+  
   if (booking.allocation && booking.allocation.length > 0) {
-    const allocSum = booking.allocation.reduce((sum, r) => sum + (Number(r.price) || 0), 0);
-    const addonsSum = (booking.addons || []).filter(a => a.status !== "cancelled").reduce((s, a) => s + (Number(a.price) || 0), 0);
-    return (allocSum * nights) + addonsSum;
+    baseRoomTotal = booking.allocation.reduce((sum, r) => sum + (Number(r.price) || 0), 0) * nights;
+    addonsSum = (booking.addons || []).filter(a => a.status !== "cancelled").reduce((s, a) => s + (Number(a.price) || 0), 0);
+  } else if (booking.basePrice) {
+    baseRoomTotal = Number(booking.basePrice) * nights;
   }
-  return Number(booking.totalAmount) || 0;
+  
+  const subtotal = baseRoomTotal + addonsSum;
+  
+  // If no allocations/addons, just return total amount logic without breakdown
+  if (subtotal === 0) {
+     return `*Total Paid:* ₹${Number(booking.totalAmount || 0).toLocaleString()}`;
+  }
+
+  const discount = Math.round(subtotal * 0.10);
+  const taxes = Math.round((subtotal - discount) * 0.18);
+  const finalTotal = booking.totalAmount ? Number(booking.totalAmount) : Math.round(subtotal - discount + taxes);
+
+  let breakdown = `*Pricing Breakdown:*\n`;
+  breakdown += `• Base Room Price: ₹${baseRoomTotal.toLocaleString()}\n`;
+  if (addonsSum > 0) {
+    breakdown += `• Extra Bedding/Services: ₹${addonsSum.toLocaleString()}\n`;
+  }
+  breakdown += `• 10% Discount: -₹${discount.toLocaleString()}\n`;
+  breakdown += `• 18% GST: +₹${taxes.toLocaleString()}\n`;
+  breakdown += `*Final Amount:* ₹${finalTotal.toLocaleString()}`;
+  
+  return breakdown;
 };
 
 /**
@@ -108,8 +132,8 @@ const sendBookingNotification = async (booking, roomName) => {
       `*Guest:* ${booking.fullName}\n` +
       `*Rooms:* ${roomsStr}\n` +
       `*Dates:* ${booking.checkIn.toDateString()} - ${booking.checkOut.toDateString()}\n` +
-      `*Guests:* ${booking.guests?.adults || 0} Adults, ${booking.guests?.children || 0} Children\n` +
-      `*Total:* ₹${getDynamicTotal(booking).toLocaleString()}\n` +
+      `*Guests:* ${booking.guests?.adults || 0} Adults, ${booking.guests?.children || 0} Children\n\n` +
+      `${getPricingBreakdownStr(booking)}\n\n` +
       `*Phone:* ${booking.phone}\n\n` +
       `Please log in to the admin dashboard to confirm.`;
 
@@ -145,8 +169,8 @@ const sendBookingConfirmationWhatsApp = async (booking) => {
       `*Booking Confirmed - Forest Gate Sanctuary*\n\n` +
       `Dear ${booking.fullName},\n` +
       `Your booking for *${roomsStr}* has been confirmed!\n\n` +
-      `*Dates:* ${checkInStr} - ${new Date(booking.checkOut).toLocaleDateString()}\n` +
-      `*Total:* ₹${getDynamicTotal(booking).toLocaleString()}\n\n` +
+      `*Dates:* ${checkInStr} - ${new Date(booking.checkOut).toLocaleDateString()}\n\n` +
+      `${getPricingBreakdownStr(booking)}\n\n` +
       `*Cancellation Policy:* Full refund only if cancelled 48 hours before check-in.\n\n` +
       `We look forward to seeing you!`;
 
@@ -184,8 +208,8 @@ const sendBookingPendingGuestWhatsApp = async (booking) => {
       `Thank you for choosing The Forest Gate! 🏕️\n\n` +
       `Your booking request for *${roomsStr}* has been received and is currently *pending confirmation* by our team.\n\n` +
       `*Dates:* ${checkInStr} – ${checkOutStr}\n` +
-      `*Guests:* ${booking.guests?.adults || 0} Adults, ${booking.guests?.children || 0} Children\n` +
-      `*Total:* ₹${getDynamicTotal(booking).toLocaleString()}\n\n` +
+      `*Guests:* ${booking.guests?.adults || 0} Adults, ${booking.guests?.children || 0} Children\n\n` +
+      `${getPricingBreakdownStr(booking)}\n\n` +
       `You will receive a confirmation message once our team approves your booking. We'll be in touch shortly! 🙏`;
 
     debugLog({ method: "sendBookingPendingGuestWhatsApp (Guest)", to: sanitizePhone(booking.phone), body: message });
@@ -216,7 +240,8 @@ const sendPaymentConfirmationWhatsApp = async (booking) => {
     const message =
       `*Payment Received - Forest Gate Sanctuary*\n\n` +
       `Dear ${booking.fullName},\n` +
-      `Thank you! We have successfully received your payment of *₹${getDynamicTotal(booking).toLocaleString()}* for your booking *${booking.bookingId || booking._id}*.\n\n` +
+      `Thank you! We have successfully received your payment for booking *${booking.bookingId || booking._id}*.\n\n` +
+      `${getPricingBreakdownStr(booking)}\n\n` +
       `*Current Status:* Paid ✅\n\n` +
       `*Cancellation Policy:* Full refund only if cancelled 48 hours before check-in.\n\n` +
       `Thanks for paying, you are always welcome! 🙏\n\n` +
