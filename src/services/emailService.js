@@ -4,10 +4,15 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: process.env.SMTP_HOST || "mail.forestgatetrails.com",
+  port: Number(process.env.SMTP_PORT) || 465,
+  secure: true,
   auth: {
-    user: process.env.EMAIL_USER, // Support@forestgatetrails.com
-    pass: process.env.EMAIL_PASS, // Gmail App Password
+    user: process.env.EMAIL_USER || "Support@forestgatetrails.com",
+    pass: process.env.EMAIL_PASS,
+  },
+  tls: {
+    rejectUnauthorized: false,
   },
 });
 

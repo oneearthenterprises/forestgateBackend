@@ -22,12 +22,15 @@ export const newsletter = async (req, res) => {
 
     // Send Welcome Email
     const transporter = nodemailer.createTransport({
-      host: "mail.forestgatetrails.com",
-      port: 465,
+      host: process.env.SMTP_HOST || "mail.forestgatetrails.com",
+      port: Number(process.env.SMTP_PORT) || 465,
       secure: true,
       auth: {
-        user: "Support@forestgatetrails.com",
+        user: process.env.EMAIL_USER || "Support@forestgatetrails.com",
         pass: process.env.EMAIL_PASS,
+      },
+      tls: {
+        rejectUnauthorized: false,
       },
     });
 
@@ -177,12 +180,15 @@ export const sendNewsletter = async (req, res) => {
     }
 
     const transporter = nodemailer.createTransport({
-      host: "mail.forestgatetrails.com",
-      port: 465,
+      host: process.env.SMTP_HOST || "mail.forestgatetrails.com",
+      port: Number(process.env.SMTP_PORT) || 465,
       secure: true,
       auth: {
-        user: "Support@forestgatetrails.com",
+        user: process.env.EMAIL_USER || "Support@forestgatetrails.com",
         pass: process.env.EMAIL_PASS,
+      },
+      tls: {
+        rejectUnauthorized: false,
       },
     });
 
