@@ -6,7 +6,7 @@ dotenv.config();
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: process.env.EMAIL_USER, // forestgatemorni@gmail.com
+    user: process.env.EMAIL_USER, // Support@forestgatetrails.com
     pass: process.env.EMAIL_PASS, // Gmail App Password
   },
 });
@@ -52,7 +52,7 @@ const getDynamicTotal = (booking) => {
       .reduce((s, a) => s + (Number(a.price) || 0), 0);
 
     const baseTotal = allocSum * nights + addonsSum;
-    const discount = baseTotal * 0.10;
+    const discount = baseTotal * 0.1;
     const taxes = (baseTotal - discount) * 0.18;
     return Math.round(baseTotal - discount + taxes);
   }
@@ -62,23 +62,30 @@ const getDynamicTotal = (booking) => {
 const getPricingBreakdownHtml = (booking) => {
   const inDate = new Date(booking.checkIn);
   const outDate = new Date(booking.checkOut);
-  const nights = Math.max(1, Math.ceil((outDate - inDate) / (1000 * 60 * 60 * 24)));
+  const nights = Math.max(
+    1,
+    Math.ceil((outDate - inDate) / (1000 * 60 * 60 * 24)),
+  );
 
   let baseRoomTotal = 0;
   let addonsSum = 0;
 
   if (booking.allocation && booking.allocation.length > 0) {
-    baseRoomTotal = booking.allocation.reduce((sum, r) => sum + (Number(r.price) || 0), 0) * nights;
-    addonsSum = (booking.addons || []).filter(a => a.status !== "cancelled").reduce((s, a) => s + (Number(a.price) || 0), 0);
+    baseRoomTotal =
+      booking.allocation.reduce((sum, r) => sum + (Number(r.price) || 0), 0) *
+      nights;
+    addonsSum = (booking.addons || [])
+      .filter((a) => a.status !== "cancelled")
+      .reduce((s, a) => s + (Number(a.price) || 0), 0);
   } else if (booking.basePrice) {
     baseRoomTotal = Number(booking.basePrice) * nights;
   }
 
   const subtotal = baseRoomTotal + addonsSum;
 
-  if (subtotal === 0) return ''; // fallback if empty
+  if (subtotal === 0) return ""; // fallback if empty
 
-  const discount = Math.round(subtotal * 0.10);
+  const discount = Math.round(subtotal * 0.1);
   const taxes = Math.round((subtotal - discount) * 0.18);
 
   let html = `
@@ -333,7 +340,7 @@ export const verifyOtpRegisterOtp = async (email, otp) => {
     console.log("=".repeat(50) + "\n");
 
     await transporter.sendMail({
-      from: `"ForestGate" <forestgatemorni@gmail.com>`,
+      from: `"ForestGate" <Support@forestgatetrails.com>`,
       to: email,
       subject: "Verify OTP - Forest Gate",
       html: getVerifyOtpTemplate(otp),
@@ -346,7 +353,7 @@ export const verifyOtpRegisterOtp = async (email, otp) => {
 export const sendBirthdayEmail = async (email, name) => {
   try {
     await transporter.sendMail({
-      from: `"ForestGate" <forestgatemorni@gmail.com>`,
+      from: `"ForestGate" <Support@forestgatetrails.com>`,
       to: email,
       subject: `Happy Birthday, ${name}! 🎂`,
       html: getBirthdayTemplate(name, email),
@@ -360,7 +367,7 @@ export const sendBirthdayEmail = async (email, name) => {
 export const sendAnniversaryEmail = async (email, name) => {
   try {
     await transporter.sendMail({
-      from: `"ForestGate" <forestgatemorni@gmail.com>`,
+      from: `"ForestGate" <Support@forestgatetrails.com>`,
       to: email,
       subject: `Happy Anniversary, ${name}! 🥂`,
       html: getAnniversaryTemplate(name, email),
@@ -374,7 +381,7 @@ export const sendAnniversaryEmail = async (email, name) => {
 export const sendForgotOtpEmail = async (email, otp) => {
   try {
     await transporter.sendMail({
-      from: `"ForestGate" <forestgatemorni@gmail.com>`,
+      from: `"ForestGate" <Support@forestgatetrails.com>`,
       to: email,
       subject: `Reset Password OTP - Forest Gate`,
       html: getForgotOtpTemplate(otp),
@@ -388,7 +395,7 @@ export const sendForgotOtpEmail = async (email, otp) => {
 export const sendResetSuccessEmail = async (email) => {
   try {
     await transporter.sendMail({
-      from: `"ForestGate" <forestgatemorni@gmail.com>`,
+      from: `"ForestGate" <Support@forestgatetrails.com>`,
       to: email,
       subject: `Password Reset Successfully - Forest Gate`,
       html: getResetSuccessTemplate(),
@@ -541,7 +548,7 @@ const getBookingConfirmationTemplate = (booking) => `
 export const sendBookingConfirmationEmail = async (booking) => {
   try {
     await transporter.sendMail({
-      from: `"ForestGate" <forestgatemorni@gmail.com>`,
+      from: `"ForestGate" <Support@forestgatetrails.com>`,
       to: booking.email,
       subject: `Booking Confirmed - Forest Gate Sanctuary`,
       html: getBookingConfirmationTemplate(booking),
@@ -740,7 +747,7 @@ const getBookingCancelledTemplate = (booking) => `
 export const sendBookingReceivedEmail = async (booking) => {
   try {
     await transporter.sendMail({
-      from: `"ForestGate" <forestgatemorni@gmail.com>`,
+      from: `"ForestGate" <Support@forestgatetrails.com>`,
       to: booking.email,
       subject: `Booking Request Received - Forest Gate Sanctuary`,
       html: getBookingReceivedTemplate(booking),
@@ -753,7 +760,7 @@ export const sendBookingReceivedEmail = async (booking) => {
 export const sendBookingCancelledEmail = async (booking) => {
   try {
     await transporter.sendMail({
-      from: `"ForestGate" <forestgatemorni@gmail.com>`,
+      from: `"ForestGate" <Support@forestgatetrails.com>`,
       to: booking.email,
       subject: `Booking Cancelled - Forest Gate Sanctuary`,
       html: getBookingCancelledTemplate(booking),
@@ -820,15 +827,16 @@ const getPaymentConfirmationUserTemplate = (booking) => `
             <div class="info-text">
                 <p><strong>Lead Guest:</strong> ${booking.fullName}</p>
                 <p><strong>Total Guests:</strong> ${booking.guests?.adults || 0} Adults, ${booking.guests?.children || 0} Children</p>
-                ${booking.guestDetails && booking.guestDetails.length > 0
-    ? `
+                ${
+                  booking.guestDetails && booking.guestDetails.length > 0
+                    ? `
                     <p><strong>Members List:</strong></p>
                     <ul style="margin: 5px 0; padding-left: 20px;">
                         ${booking.guestDetails.map((guest) => `<li>${guest.name} (${guest.type}${guest.age ? `, Age: ${guest.age}` : ""})</li>`).join("")}
                     </ul>
                 `
-    : ""
-  }
+                    : ""
+                }
             </div>
 
             <div class="section-title">Financial Summary / Invoice</div>
@@ -843,29 +851,30 @@ const getPaymentConfirmationUserTemplate = (booking) => `
                     <tr>
                         <td>Stay: ${getRoomListStr(booking)} (${booking.totalNights} Nights)</td>
                         <td style="text-align: right;">₹${(booking.allocation &&
-    booking.allocation.length > 0
-    ? booking.allocation.reduce(
-      (sum, r) => sum + (Number(r.price) || 0),
-      0,
-    ) * (booking.totalNights || 1)
-    : (booking.pricePerNight || 0) *
-    (booking.totalNights || 1)
-  ).toLocaleString()}</td>
+                        booking.allocation.length > 0
+                          ? booking.allocation.reduce(
+                              (sum, r) => sum + (Number(r.price) || 0),
+                              0,
+                            ) * (booking.totalNights || 1)
+                          : (booking.pricePerNight || 0) *
+                            (booking.totalNights || 1)
+                        ).toLocaleString()}</td>
                     </tr>
-                    ${booking.addons && booking.addons.length > 0
-    ? booking.addons
-      .filter((a) => a.status !== "cancelled")
-      .map(
-        (addon) => `
+                    ${
+                      booking.addons && booking.addons.length > 0
+                        ? booking.addons
+                            .filter((a) => a.status !== "cancelled")
+                            .map(
+                              (addon) => `
                         <tr>
                             <td>Add-on: ${addon.name}</td>
                             <td style="text-align: right;">₹${(addon.price || 0).toLocaleString()}</td>
                         </tr>
                     `,
-      )
-      .join("")
-    : ""
-  }
+                            )
+                            .join("")
+                        : ""
+                    }
                     <tr class="total-row">
                         <td>TOTAL PAID</td>
                         <td style="text-align: right;">₹${getDynamicTotal(booking).toLocaleString()}</td>
@@ -873,21 +882,23 @@ const getPaymentConfirmationUserTemplate = (booking) => `
                 </tbody>
             </table>
 
-            ${booking.specialRequest
-    ? `
+            ${
+              booking.specialRequest
+                ? `
                 <div class="section-title">Special Requests</div>
                 <div class="info-text">${booking.specialRequest}</div>
             `
-    : ""
-  }
+                : ""
+            }
 
-            ${booking.notes
-    ? `
+            ${
+              booking.notes
+                ? `
                 <div class="section-title">Stay Notes</div>
                 <div class="info-text">${booking.notes}</div>
             `
-    : ""
-  }
+                : ""
+            }
 
             <div style="text-align: center;">
                 <a href="https://forestgatetrails.com/my-bookings" class="cta-button">Manage My Booking</a>
@@ -948,7 +959,7 @@ const getPaymentConfirmationAdminTemplate = (booking) => `
 export const sendPaymentConfirmationToUser = async (booking) => {
   try {
     await transporter.sendMail({
-      from: `"ForestGate" <forestgatemorni@gmail.com>`,
+      from: `"ForestGate" <Support@forestgatetrails.com>`,
       to: booking.email,
       subject: `Payment Confirmed - Forest Gate Sanctuary`,
       html: getPaymentConfirmationUserTemplate(booking),
@@ -962,8 +973,8 @@ export const sendPaymentConfirmationToUser = async (booking) => {
 export const sendPaymentConfirmationToAdmin = async (booking) => {
   try {
     await transporter.sendMail({
-      from: `"ForestGate" <forestgatemorni@gmail.com>`,
-      to: "forestgatemorni@gmail.com",
+      from: `"ForestGate" <Support@forestgatetrails.com>`,
+      to: "Support@forestgatetrails.com",
       subject: `ALERT: Payment Received from ${booking.fullName}`,
       html: getPaymentConfirmationAdminTemplate(booking),
     });

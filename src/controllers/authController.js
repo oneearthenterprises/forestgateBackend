@@ -26,7 +26,7 @@ const adminLogin = async (req, res) => {
     }
 
     // Static admin credentials check
-    const isAdminEmail = email === "forestgatemorni@gmail.com";
+    const isAdminEmail = email === "Support@forestgatetrails.com";
     const isAdminPassword = password === "adminforestgate";
 
     if (!isAdminEmail || !isAdminPassword) {
@@ -90,7 +90,9 @@ export const verifyOtpRegister = async (req, res) => {
     const existingUser = await Usermodel.findOne({ email });
     if (existingUser) {
       await PendingUser.deleteOne({ email });
-      return res.status(409).json({ message: "Account already exists. Please log in." });
+      return res
+        .status(409)
+        .json({ message: "Account already exists. Please log in." });
     }
 
     // Generate unique userId
@@ -158,13 +160,14 @@ const registerUser = async (req, res) => {
         otpLastSentAt: new Date(),
         createdAt: new Date(), // reset TTL
       },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
+      { upsert: true, new: true, setDefaultsOnInsert: true },
     );
 
     await verifyOtpRegisterOtp(email, otp);
 
     return res.status(201).json({
-      message: "OTP sent to your email. Please verify to complete registration.",
+      message:
+        "OTP sent to your email. Please verify to complete registration.",
       email,
     });
   } catch (error) {
@@ -372,11 +375,18 @@ const resendRegistrationOtp = async (req, res) => {
     // Look in pending registrations
     const pending = await PendingUser.findOne({ email });
     if (!pending) {
-      return res.status(404).json({ message: "No pending registration found. Please sign up again." });
+      return res
+        .status(404)
+        .json({
+          message: "No pending registration found. Please sign up again.",
+        });
     }
 
     // ⏳ Rate limit: 1 OTP per 60 sec
-    if (pending.otpLastSentAt && Date.now() - new Date(pending.otpLastSentAt).getTime() < 60 * 1000) {
+    if (
+      pending.otpLastSentAt &&
+      Date.now() - new Date(pending.otpLastSentAt).getTime() < 60 * 1000
+    ) {
       return res.status(429).json({
         message: "Please wait before requesting another OTP",
       });
