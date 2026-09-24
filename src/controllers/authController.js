@@ -25,11 +25,14 @@ const adminLogin = async (req, res) => {
       });
     }
 
-    // Static admin credentials check
-    const isAdminEmail = email === "Support@forestgatetrails.com";
-    const isAdminPassword = password === "adminforestgate";
+    // Admin credentials check (case-insensitive email)
+    const expectedEmail = (process.env.ADMINDASHBORDEMAIL || "support@forestgatetrails.com").toLowerCase();
+    const expectedPassword = process.env.ADMINDASHBORDPASSWORD || "adminforestgate";
 
-    if (!isAdminEmail || !isAdminPassword) {
+    const isEmailValid = email.toLowerCase() === expectedEmail;
+    const isPasswordValid = password === expectedPassword;
+
+    if (!isEmailValid || !isPasswordValid) {
       return res.status(401).json({
         message: "Invalid credentials",
       });
