@@ -531,7 +531,7 @@ const getBookingConfirmationTemplate = (booking) => `
             <div class="footer">
                 <div class="contact-info">
                     <strong>Forest Gate Sanctuary</strong><br>
-                    Need assistance? WhatsApp or call us at <a href="tel:+919876543210" style="color: #111827; text-decoration: none; font-weight: bold;">+91 98765 43210</a><br>
+                    Need assistance? WhatsApp or call us at <a href="tel:+917009984070" style="color: #111827; text-decoration: none; font-weight: bold;">+91 70099 84070</a><br>
                     <a href="https://forestgatetrails.com" style="color: #111827; text-decoration: underline;">www.forestgatetrails.com</a>
                 </div>
                 
@@ -687,7 +687,7 @@ const getBookingReceivedTemplate = (booking) => `
             <div class="footer">
                 <div class="contact-info">
                     <strong>Forest Gate Sanctuary</strong><br>
-                    Have questions? Call or WhatsApp us at <a href="tel:+919876543210" style="color: #1a3622; text-decoration: none; font-weight: bold;">+91 98765 43210</a><br>
+                    Have questions? Call or WhatsApp us at <a href="tel:+917009984070" style="color: #1a3622; text-decoration: none; font-weight: bold;">+91 70099 84070</a><br>
                     <a href="https://forestgatetrails.com" style="color: #1a3622; text-decoration: underline;">www.forestgatetrails.com</a>
                 </div>
                 
