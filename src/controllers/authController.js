@@ -536,6 +536,12 @@ const getProfile = async (req, res) => {
 const updateProfile = async (req, res) => {
   try {
     const userId = req.user._id;
+    if (userId === "static-admin-id") {
+      return res.status(200).json({
+        message: "Profile updated successfully",
+        user: req.user,
+      });
+    }
     const updateData = { ...req.body };
     updateData.corporatePartyOptions =
       req.body.corporatePartyOptions === "true";
