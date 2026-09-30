@@ -27,11 +27,17 @@ export const updatePopupData = async (req, res) => {
       title,
       description,
       isActive,
+      removeImage,
     } = req.body;
 
-    if (title) popup.title = title;
-    if (description) popup.description = description;
+    if (title !== undefined) popup.title = title;
+    if (description !== undefined) popup.description = description;
     if (isActive !== undefined) popup.isActive = isActive === 'true' || isActive === true;
+
+    // Handle image deletion if requested
+    if (removeImage === 'true' || removeImage === true) {
+      popup.imageUrl = '';
+    }
 
     // Handle image upload if a file was provided
     if (req.file) {
@@ -51,6 +57,22 @@ export const updatePopupData = async (req, res) => {
     res.status(200).json({ success: true, message: 'Welcome popup updated correctly!', data: popup });
   } catch (error) {
     console.error('Update Popup Error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Delete the popup image directly
+export const deletePopupImage = async (req, res) => {
+  try {
+    let popup = await WelcomePopup.findOne();
+    if (!popup) {
+      popup = new WelcomePopup();
+    }
+    popup.imageUrl = '';
+    await popup.save();
+    res.status(200).json({ success: true, message: 'Welcome popup image deleted successfully!', data: popup });
+  } catch (error) {
+    console.error('Delete Popup Image Error:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
